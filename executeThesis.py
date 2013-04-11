@@ -51,8 +51,8 @@ def createAndAnalyzeGeneTissueMap(outFile):
     startTime = time.time()
     outFile.write('Creating Tissue:Gene Map...\n')
     outFile.write('\tWarning: Will take ~10 hours. Printing progress...\n')
-
-    parallelizeTaskByTissue(createTissueGeneMap)
+    
+    createTissueGeneMap()
 
     elapsedTime = time.time() - startTime
     h, m, s = hoursMinutesSeconds(elapsedTime)
