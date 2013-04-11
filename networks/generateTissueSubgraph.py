@@ -14,45 +14,6 @@ FILENAME = 'COMBINED.DEFAULT_NETWORKS.BP_COMBINING.txt'
 
 OUT_BASE_FILENAME = '%s.tissueSubgraph.analysis'
 
-# - - - - - GRAPH GENERATION - - - - - #
-
-# generateAllCollapsedTissueSubgraphs():
-def generateAllCollapsedTissueSubgraphs():
-    # Use Augmented Tissue List
-    AUGMENTED_TISSUE_LIST = ['global'] + FUNCTIONAL_TISSUE_LIST
-
-    # Iterate through all Tissues
-    for tissue in AUGMENTED_TISSUE_LIST:
-        print tissue
-        generateCollapsedTissueSubgraph(tissue)
-    
-# generateCollapsedTissueSubgraph
-def generateCollapsedTissueSubgraph(tissue):
-    # Open DB Connection
-    cli = MongoClient()
-    db = cli.db
-    moduleDB = db.modules
-
-    # Get Tissue Subgraph
-    graph = getTissueSubgraph(tissue)
-
-    # Get Module Set
-    moduleSet = getTissueModuleGeneSet(tissue)
-
-    # Iterate through Modules for Tissue and Collapse within Graph
-    for module in moduleSet:
-        geneList = list(module)
-        collapseModule(graph, geneList)
-
-    # Write Collapsed Graph to Disk
-    outFilename = GENEMANIA_COLLAPSED_TISSUE_BASE_FILENAME % \
-        (tissue, DESIRED_INTERACTION_TYPE)
-    outFilePath = PATH_TO_COLLAPSED_TISSUE_SUBGRAPHS + outFilename
-    writeGenemaniaGraphToDisk(graph, outFilePath)
-
-    cli.close()
-    return
-
 # - - - - - GRAPH ANALYSIS - - - - - #
 
 # analyzeAllTissueSubgraphs
