@@ -1,0 +1,89 @@
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/757/trunk/psicquic-mitab-analysis/dbpairs/selectors
+END
+AltIdDatabase2LineCountSelector.java
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svn/!svn/ver/757/trunk/psicquic-mitab-analysis/dbpairs/selectors/AltIdDatabase2LineCountSelector.java
+END
+Database2LineCountSelector.java
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/!svn/ver/757/trunk/psicquic-mitab-analysis/dbpairs/selectors/Database2LineCountSelector.java
+END
+DatabasesSelector.java
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/!svn/ver/757/trunk/psicquic-mitab-analysis/dbpairs/selectors/DatabasesSelector.java
+END
+DatabasePair2CountSelector.java
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/!svn/ver/757/trunk/psicquic-mitab-analysis/dbpairs/selectors/DatabasePair2CountSelector.java
+END
+CollectionSelector.java
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/!svn/ver/757/trunk/psicquic-mitab-analysis/dbpairs/selectors/CollectionSelector.java
+END
+Alias2LineCountSelector.java
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/!svn/ver/757/trunk/psicquic-mitab-analysis/dbpairs/selectors/Alias2LineCountSelector.java
+END
+IdDatabase2CountSelector.java
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/!svn/ver/757/trunk/psicquic-mitab-analysis/dbpairs/selectors/IdDatabase2CountSelector.java
+END
+AltIdDatabase2CountSelector.java
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/!svn/ver/757/trunk/psicquic-mitab-analysis/dbpairs/selectors/AltIdDatabase2CountSelector.java
+END
+MapSelector.java
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/!svn/ver/757/trunk/psicquic-mitab-analysis/dbpairs/selectors/MapSelector.java
+END
+Database2CountSelector.java
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/!svn/ver/757/trunk/psicquic-mitab-analysis/dbpairs/selectors/Database2CountSelector.java
+END
+DatabasePair2LineCountSelector.java
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svn/!svn/ver/757/trunk/psicquic-mitab-analysis/dbpairs/selectors/DatabasePair2LineCountSelector.java
+END
+DatabasePairsSelector.java
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/!svn/ver/757/trunk/psicquic-mitab-analysis/dbpairs/selectors/DatabasePairsSelector.java
+END
+IdDatabase2LineCountSelector.java
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/!svn/ver/757/trunk/psicquic-mitab-analysis/dbpairs/selectors/IdDatabase2LineCountSelector.java
+END
+Alias2CountSelector.java
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/!svn/ver/757/trunk/psicquic-mitab-analysis/dbpairs/selectors/Alias2CountSelector.java
+END

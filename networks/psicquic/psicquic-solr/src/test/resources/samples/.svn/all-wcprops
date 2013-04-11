@@ -1,0 +1,47 @@
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/1129/trunk/psicquic-solr/src/test/resources/samples
+END
+sampleFileNegative.txt
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/!svn/ver/1127/trunk/psicquic-solr/src/test/resources/samples/sampleFileNegative.txt
+END
+sampleFileMitab25.txt
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/!svn/ver/1126/trunk/psicquic-solr/src/test/resources/samples/sampleFileMitab25.txt
+END
+sampleFileMitab26.txt
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/!svn/ver/1126/trunk/psicquic-solr/src/test/resources/samples/sampleFileMitab26.txt
+END
+sampleFileConfidence.txt
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/!svn/ver/940/trunk/psicquic-solr/src/test/resources/samples/sampleFileConfidence.txt
+END
+sampleFileConfidence.xml
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/!svn/ver/1007/trunk/psicquic-solr/src/test/resources/samples/sampleFileConfidence.xml
+END
+oldLuceneFields.txt
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/!svn/ver/954/trunk/psicquic-solr/src/test/resources/samples/oldLuceneFields.txt
+END
+sampleFileParameter.txt
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/!svn/ver/1129/trunk/psicquic-solr/src/test/resources/samples/sampleFileParameter.txt
+END

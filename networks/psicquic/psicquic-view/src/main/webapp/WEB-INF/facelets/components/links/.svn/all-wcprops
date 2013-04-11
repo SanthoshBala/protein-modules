@@ -1,0 +1,89 @@
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/!svn/ver/1777/trunk/psicquic-view/src/main/webapp/WEB-INF/facelets/components/links
+END
+GoEuropePubmedCentral.xhtml
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svn/!svn/ver/1777/trunk/psicquic-view/src/main/webapp/WEB-INF/facelets/components/links/GoEuropePubmedCentral.xhtml
+END
+GoDrugPortChemicalView.xhtml
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svn/!svn/ver/603/trunk/psicquic-view/src/main/webapp/WEB-INF/facelets/components/links/GoDrugPortChemicalView.xhtml
+END
+GoReactomeSkyPainter.xhtml
+K 25
+svn:wc:ra_dav:version-url
+V 115
+/svn/!svn/ver/1482/trunk/psicquic-view/src/main/webapp/WEB-INF/facelets/components/links/GoReactomeSkyPainter.xhtml
+END
+GoChebi.xhtml
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svn/!svn/ver/603/trunk/psicquic-view/src/main/webapp/WEB-INF/facelets/components/links/GoChebi.xhtml
+END
+GoTemplate.xhtml
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/!svn/ver/1482/trunk/psicquic-view/src/main/webapp/WEB-INF/facelets/components/links/GoTemplate.xhtml
+END
+GoDrugbank.xhtml
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svn/!svn/ver/603/trunk/psicquic-view/src/main/webapp/WEB-INF/facelets/components/links/GoDrugbank.xhtml
+END
+GoLigandPlot.xhtml
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svn/!svn/ver/1482/trunk/psicquic-view/src/main/webapp/WEB-INF/facelets/components/links/GoLigandPlot.xhtml
+END
+GoOls.xhtml
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/!svn/ver/1482/trunk/psicquic-view/src/main/webapp/WEB-INF/facelets/components/links/GoOls.xhtml
+END
+GoChemblCompound.xhtml
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svn/!svn/ver/603/trunk/psicquic-view/src/main/webapp/WEB-INF/facelets/components/links/GoChemblCompound.xhtml
+END
+GoUniprot.xhtml
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/!svn/ver/603/trunk/psicquic-view/src/main/webapp/WEB-INF/facelets/components/links/GoUniprot.xhtml
+END
+GoMoleculeView.xhtml
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/svn/!svn/ver/1482/trunk/psicquic-view/src/main/webapp/WEB-INF/facelets/components/links/GoMoleculeView.xhtml
+END
+GoChemblTarget.xhtml
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svn/!svn/ver/603/trunk/psicquic-view/src/main/webapp/WEB-INF/facelets/components/links/GoChemblTarget.xhtml
+END
+GoInterpro.xhtml
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/!svn/ver/1482/trunk/psicquic-view/src/main/webapp/WEB-INF/facelets/components/links/GoInterpro.xhtml
+END
+GoDrugPortProteinView.xhtml
+K 25
+svn:wc:ra_dav:version-url
+V 115
+/svn/!svn/ver/603/trunk/psicquic-view/src/main/webapp/WEB-INF/facelets/components/links/GoDrugPortProteinView.xhtml
+END

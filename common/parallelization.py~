@@ -1,0 +1,82 @@
+#! /usr/bin/python
+
+# paralellization.py
+# Author: Santhosh Balasubramanian
+# Created: March 24, 2013
+# Last Modified: March 24, 2013
+
+
+# Python Imports
+import math
+from multiprocessing import Process
+
+# Global Imports
+from settings import *
+
+
+# - - - - - - - - - - LOCAL SETTINGS - - - - - - - - - - #
+
+
+NUM_CPU_CORES = 4
+
+
+# - - - - - - - - - - TISSUE - - - - - - - - - - #
+
+
+# parallelizeTaskByRecord: Paralellizes <functionHandle> amongst
+# 2*<NUM_CPU_CORES> processes by splitting along DB record.
+def parallelizeTaskByRecord(functionHandle, numRecords):
+    # Determine # Processes and Records Per Process
+    numProcesses = 2*NUM_CPU_CORES
+    recordsPerProcess = int(math.ceil(numRecords/float(numProcesses)))
+    processList = []
+
+    # Create Processes
+    for i in range(numProcesses):
+        processList.append( Process( target = functionHandle, 
+                                     args = ( i*recordsPerProcess,
+                                              recordsPerProcess ) ) )
+
+    # Start Processes
+    for i in range(numProcesses):
+        processList[i].start()
+
+    # Join Processes
+    for i in range(numProcesses):
+        processList[i].join()
+
+    return
+
+
+# parallelizeTaskByTissue: Paralellizes <functionHandle> amongst 
+# 2*<NUM_CPU_CORES> processes. Joins processes before returning.
+def parallelizeTaskByTissue(functionHandle, augmented = False):
+
+    if augmented:
+        TISSUE_LIST = AUGMENTED_TISSUE_LIST
+        numTissues = len(TISSUE_LIST)
+    else:
+        TISSUE_LIST = FUNCTIONAL_TISSUE_LIST
+        numTissues = len(TISSUE_LIST)
+
+    # Determine # Processes and # Tissues Per Process
+    numProcesses = 2*NUM_CPU_CORES
+    tissuesPerProcess = int(math.ceil(numTissues/float(numProcesses)))
+    
+    # Create Processes
+    processList = []
+    for i in range(numProcesses):
+        processList.append( Process(target=functionHandle, 
+                                    args = (i*tissuesPerProcess, 
+                                            (i+1)*tissuesPerProcess)) )
+
+    # Start Processes
+    for i in range(numProcesses):
+        processList[i].start()
+
+    # Join Processes
+    for i in range(numProcesses):
+        processList[i].join()
+
+    return
+

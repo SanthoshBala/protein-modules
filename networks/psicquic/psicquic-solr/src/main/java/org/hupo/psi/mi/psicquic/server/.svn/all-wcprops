@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/!svn/ver/956/trunk/psicquic-solr/src/main/java/org/hupo/psi/mi/psicquic/server
+END
+MitabTransformer.java
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/!svn/ver/956/trunk/psicquic-solr/src/main/java/org/hupo/psi/mi/psicquic/server/MitabTransformer.java
+END
+PsqTransformer.java
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/!svn/ver/934/trunk/psicquic-solr/src/main/java/org/hupo/psi/mi/psicquic/server/PsqTransformer.java
+END
+XsltTransformer.java
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svn/!svn/ver/937/trunk/psicquic-solr/src/main/java/org/hupo/psi/mi/psicquic/server/XsltTransformer.java
+END

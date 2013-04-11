@@ -1,0 +1,15 @@
+python
+MongoDB
+pymongo
+graph-tool
+	GCC
+	boost
+	expat
+	scipy
+	numpy
+	CGAL
+	sparsehash
+	cairomm
+	pycairo
+	matplotlib
+	Graphviz

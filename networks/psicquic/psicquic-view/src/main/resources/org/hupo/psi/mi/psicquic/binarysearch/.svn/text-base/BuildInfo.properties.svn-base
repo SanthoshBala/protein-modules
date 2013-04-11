@@ -1,0 +1,5 @@
+# Automatically set, do not modify
+artifactId=${artifactId}
+version=${version}
+buildNumber=${buildNumber}
+builtBy=${user}

@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/!svn/ver/1544/trunk/psicquic-clustering/src/main/java/org/hupo/psi/mi/psicquic/clustering
+END
+ClusteringContext.java
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svn/!svn/ver/658/trunk/psicquic-clustering/src/main/java/org/hupo/psi/mi/psicquic/clustering/ClusteringContext.java
+END
+DefaultInteractionClusteringService.java
+K 25
+svn:wc:ra_dav:version-url
+V 135
+/svn/!svn/ver/1253/trunk/psicquic-clustering/src/main/java/org/hupo/psi/mi/psicquic/clustering/DefaultInteractionClusteringService.java
+END
+ClusteringConfig.java
+K 25
+svn:wc:ra_dav:version-url
+V 115
+/svn/!svn/ver/658/trunk/psicquic-clustering/src/main/java/org/hupo/psi/mi/psicquic/clustering/ClusteringConfig.java
+END
+PsicquicDownloader.java
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/svn/!svn/ver/1544/trunk/psicquic-clustering/src/main/java/org/hupo/psi/mi/psicquic/clustering/PsicquicDownloader.java
+END
+ClusteringServiceException.java
+K 25
+svn:wc:ra_dav:version-url
+V 125
+/svn/!svn/ver/648/trunk/psicquic-clustering/src/main/java/org/hupo/psi/mi/psicquic/clustering/ClusteringServiceException.java
+END
+Service.java
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svn/!svn/ver/459/trunk/psicquic-clustering/src/main/java/org/hupo/psi/mi/psicquic/clustering/Service.java
+END
+InteractionClusteringService.java
+K 25
+svn:wc:ra_dav:version-url
+V 127
+/svn/!svn/ver/648/trunk/psicquic-clustering/src/main/java/org/hupo/psi/mi/psicquic/clustering/InteractionClusteringService.java
+END
+ClusteringLauncher.java
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/svn/!svn/ver/648/trunk/psicquic-clustering/src/main/java/org/hupo/psi/mi/psicquic/clustering/ClusteringLauncher.java
+END

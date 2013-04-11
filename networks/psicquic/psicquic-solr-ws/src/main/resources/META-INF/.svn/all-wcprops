@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/!svn/ver/1381/trunk/psicquic-solr-ws/src/main/resources/META-INF
+END
+jmx.spring.xml
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/!svn/ver/1261/trunk/psicquic-solr-ws/src/main/resources/META-INF/jmx.spring.xml
+END
+beans.spring.xml
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/!svn/ver/1298/trunk/psicquic-solr-ws/src/main/resources/META-INF/beans.spring.xml
+END
+ws.spring.xml
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/!svn/ver/1381/trunk/psicquic-solr-ws/src/main/resources/META-INF/ws.spring.xml
+END

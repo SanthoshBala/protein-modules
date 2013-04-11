@@ -1,0 +1,54 @@
+Extremely fast graph clustering algorithm. (Peng Jiang: peng.jiang.software@gmail.com)
+
+simple example:
+spici -i PPI.input -o cluster.output
+
+PPI.input: separated by tab
+YKL171W	YML096W	0.6065
+YBR141C	YGL091C	0.7544
+...
+
+cluster.output:
+each line for a cluster, separated by tab
+
+NOTE: we assume input graph is undirected and each edge only shows up once. So please do NOT input duplicated or symmetric edges.
+
+
+advanced example: set different parameters
+spici -i PPI.input -o cluster.output -d 0.8 -s 10 -g 0.5 -m 2
+
+Usage: spici [OPTIONS]... [FILES]...
+
+	-h Print help and exit
+
+Main:
+
+	-i	Input graph file
+	-o	Output cluster results
+
+Parameters:
+
+	-d	minimum density threshold for output clusters. Default: 0.5
+
+	-s	minimum cluster size. Default: 2
+
+	-g	minimum increment ratio. Default: 0.5
+		make sure every included vertex has reasonable contribution for the density of cluster
+
+	-m	Graph mode. Default:0.
+
+		Please estimate density = E / ( V*(V-1)/2 ).
+		
+		0: sparse graph
+		1: dense graph
+		2: large sparse graph
+
+		We use different graph data structures under different situations for best memory management.
+
+		0: sparse graph, Adjacency edge list Representation. Best speed performance for sparse graph.
+		
+		CAUTION: When reading the file, all edges will be first stored in linked list in memory (before filling in the network, we need certain network information to build up the Adjacency list). This will incur formidable amount of memory if your network is a huge sparse network. In this case, please use mode 2.
+
+		1: dense graph, close to full connected graph, Adjacency Matrix Representation
+
+		2: larege sparse graph. We read the file first to get network information to build up Adjacency list, and read the file second time to fill the network. Best memory performance for sparse graph but more disk I/O time.

@@ -1,0 +1,5 @@
+/home/santhosh/Dropbox/Thesis/code/lib/cgal/src/CGAL/CMakeFiles/CGAL.dir
+/home/santhosh/Dropbox/Thesis/code/lib/cgal/src/Core/CMakeFiles/CGAL_Core.dir
+/home/santhosh/Dropbox/Thesis/code/lib/cgal/CMakeFiles/demos.dir
+/home/santhosh/Dropbox/Thesis/code/lib/cgal/CMakeFiles/examples.dir
+/home/santhosh/Dropbox/Thesis/code/lib/cgal/CMakeFiles/install_FindCGAL.dir

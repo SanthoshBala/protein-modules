@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/!svn/ver/1709/trunk/psicquic-view/src/main/java/org/hupo/psi/mi/psicquic/view/webapp/controller/clustering
+END
+ClusteringDownloadUtils.java
+K 25
+svn:wc:ra_dav:version-url
+V 140
+/svn/!svn/ver/1561/trunk/psicquic-view/src/main/java/org/hupo/psi/mi/psicquic/view/webapp/controller/clustering/ClusteringDownloadUtils.java
+END
+ClusteringDownloadServlet.java
+K 25
+svn:wc:ra_dav:version-url
+V 142
+/svn/!svn/ver/1561/trunk/psicquic-view/src/main/java/org/hupo/psi/mi/psicquic/view/webapp/controller/clustering/ClusteringDownloadServlet.java
+END
+UserJobs.java
+K 25
+svn:wc:ra_dav:version-url
+V 125
+/svn/!svn/ver/1482/trunk/psicquic-view/src/main/java/org/hupo/psi/mi/psicquic/view/webapp/controller/clustering/UserJobs.java
+END
+ClusteringController.java
+K 25
+svn:wc:ra_dav:version-url
+V 137
+/svn/!svn/ver/1709/trunk/psicquic-view/src/main/java/org/hupo/psi/mi/psicquic/view/webapp/controller/clustering/ClusteringController.java
+END

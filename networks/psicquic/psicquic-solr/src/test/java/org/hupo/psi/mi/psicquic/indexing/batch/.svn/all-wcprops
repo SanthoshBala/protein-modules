@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/!svn/ver/1300/trunk/psicquic-solr/src/test/java/org/hupo/psi/mi/psicquic/indexing/batch
+END
+FirstTimeFailListener.java
+K 25
+svn:wc:ra_dav:version-url
+V 119
+/svn/!svn/ver/1138/trunk/psicquic-solr/src/test/java/org/hupo/psi/mi/psicquic/indexing/batch/FirstTimeFailListener.java
+END
+AbstractSolrServerTest.java
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/svn/!svn/ver/1300/trunk/psicquic-solr/src/test/java/org/hupo/psi/mi/psicquic/indexing/batch/AbstractSolrServerTest.java
+END
+SolrMitabIndexerTest.java
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/svn/!svn/ver/1300/trunk/psicquic-solr/src/test/java/org/hupo/psi/mi/psicquic/indexing/batch/SolrMitabIndexerTest.java
+END

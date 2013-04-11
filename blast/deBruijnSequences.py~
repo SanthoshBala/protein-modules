@@ -1,0 +1,121 @@
+#! /usr/bin/python
+
+# deBruijnSequences.py
+# Author: Santhosh Balasubramanian
+# Created: March 31, 2013
+# Last Modified: March 31, 2013
+
+
+# Python Imports
+from pymongo import *
+
+# Global Imports
+from settings import *
+
+# Utility Imports
+from common.strings import *
+
+
+# getExchangeSimilarGenes: Creates file containing list of genes that
+# replace one another in a module, as well as file with pairwise relations.
+def getExchangeSimilarGenes():
+    # Open DB Connection
+    cli = MongoClient()
+    db = cli.db
+    modDB = db.modules
+
+    # Open Input File
+    inFileName = 'debruijn.similarity.graph'
+    inFilePath = PATH_TO_MODULE_SIMILARITY + inFileName
+    inFile = open(inFilePath, 'r')
+
+    # Open Output File
+    outFileName = 'debruijn.exchange.gene.pairs'
+    outFilePath = PATH_TO_MODULE_SIMILARITY + outFileName
+    outFile = open(outFilePath, 'w')
+
+    geneSet = set()
+
+    # Collect Gene Set
+    for line in inFile:
+        lineFields = parseTabSeparatedLine(line)
+
+        # Ignore non-Exchange Relationships
+        if lineFields[2] != 'exchange':
+            continue
+
+        moduleAID = lineFields[0]
+        moduleBID = lineFields[1]
+
+        # Get Gene Sets
+        moduleARecord = modDB.find_one( { 'module_id' : moduleAID } )
+        moduleAGenes = set(moduleARecord.get( 'gene_list' ))
+        moduleBRecord = modDB.find_one( { 'module_id' : moduleBID } )
+        moduleBGenes = set(moduleBRecord.get( 'gene_list' ))
+        exchangeGenes = list(moduleAGenes.symmetric_difference(moduleBGenes))
+        
+        # Write Pairs
+        if exchangeGenes[0] < exchangeGenes[1]:
+            geneSet.add(exchangeGenes[0])
+            geneSet.add(exchangeGenes[1])
+            outFile.write('%s\t%s\texchange\n' % (exchangeGenes[0], 
+                                                  exchangeGenes[1]))
+
+    outFile.close()
+
+    # Write List
+    outFileName = 'debruijn.exchange.genes'
+    outFile = open(outFilePath + outFileName, 'w')
+    for gene in geneSet:
+        outFile.write('%s\n' % gene)
+
+    outFile.close()
+
+    return
+    
+
+# getExchangeSimilarProteins: Creates file containing list of proteins that
+# replace one another in a module, as well as file with pairwise relations.
+def getExchangeSimilarProteins():
+    # Open DB Connection
+    cli = MongoClient()
+    db = cli.db
+    modDB = db.modules
+    uniprotDB = db.uniprotIDMap
+
+    # Open Input Files
+    genePairFileName = 'debruijn.exchange.gene.pairs'
+    inFilePath = PATH_TO_MODULE_SIMILARITY
+    genePairFile = open(inFilePath + genePairName, 'r')
+
+    # Open Output Files
+    proteinListName = 'debruijn.exchange.proteins'
+    proteinPairName = 'debruijn.exchange.protein.pairs'
+    outFilePath = PATH_TO_MODULE_SIMILARITY
+    proteinListFile = open(outFilePath + proteinListName, 'w')
+    proteinPairFile = open(outFilePath, + proteinPairName, 'w')
+    outFile = open(outFilePath, 'w')
+
+
+    geneSet = set()
+    proteinSet = set()
+    
+
+    # Collect Protein Set
+    for line in genePairFile:
+        lineFields = parseTabSeparatedLine(line)
+
+        geneA = lineFields[0]
+        geneB = lineFields[1]
+
+        # Get Gene Sets
+        moduleARecord = modDB.find_one( { 'module_id' : moduleAID } )
+        moduleAGenes = set(moduleARecord.get( 'gene_list' ))
+        moduleBRecord = modDB.find_one( { 'module_id' : moduleBID } )
+        moduleBGenes = set(moduleBRecord.get( 'gene_list' ))
+        exchangeGenes = moduleAGenes.symmetric_difference(moduleBGenes)
+
+        # Write Output
+        for gene in exchangeGenes:
+            outFile.write('%s\t' % gene)
+        outFile.write('exchange\n')

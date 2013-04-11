@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/svn/!svn/ver/1777/trunk/psicquic-view/src/main/java/org/hupo/psi/mi/psicquic/view/webapp/controller/application
+END
+AppConfigBean.java
+K 25
+svn:wc:ra_dav:version-url
+V 131
+/svn/!svn/ver/1482/trunk/psicquic-view/src/main/java/org/hupo/psi/mi/psicquic/view/webapp/controller/application/AppConfigBean.java
+END
+XrefLinkContextFactory.java
+K 25
+svn:wc:ra_dav:version-url
+V 140
+/svn/!svn/ver/1482/trunk/psicquic-view/src/main/java/org/hupo/psi/mi/psicquic/view/webapp/controller/application/XrefLinkContextFactory.java
+END
+RequestConfigBean.java
+K 25
+svn:wc:ra_dav:version-url
+V 135
+/svn/!svn/ver/1482/trunk/psicquic-view/src/main/java/org/hupo/psi/mi/psicquic/view/webapp/controller/application/RequestConfigBean.java
+END
+XrefLinkContext.java
+K 25
+svn:wc:ra_dav:version-url
+V 133
+/svn/!svn/ver/1777/trunk/psicquic-view/src/main/java/org/hupo/psi/mi/psicquic/view/webapp/controller/application/XrefLinkContext.java
+END

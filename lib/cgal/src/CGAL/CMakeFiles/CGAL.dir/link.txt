@@ -1,0 +1,1 @@
+/usr/bin/c++  -fPIC  -frounding-math -O3 -DNDEBUG   -shared -Wl,-soname,libCGAL.so.10 -o ../../lib/libCGAL.so.10.0.0 CMakeFiles/CGAL.dir/all_files.cpp.o -lmpfr -lgmp -lboost_thread-mt -lpthread -lboost_system-mt 

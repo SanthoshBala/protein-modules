@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svn/!svn/ver/1463/trunk/psicquic-clustering/src/main/java/org/hupo/psi/mi/psicquic/clustering/job/batch
+END
+ClusterMitab.java
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/svn/!svn/ver/1253/trunk/psicquic-clustering/src/main/java/org/hupo/psi/mi/psicquic/clustering/job/batch/ClusterMitab.java
+END
+BatchDatasourceInitializer.java
+K 25
+svn:wc:ra_dav:version-url
+V 135
+/svn/!svn/ver/442/trunk/psicquic-clustering/src/main/java/org/hupo/psi/mi/psicquic/clustering/job/batch/BatchDatasourceInitializer.java
+END
+PsicquicClustererTasklet.java
+K 25
+svn:wc:ra_dav:version-url
+V 134
+/svn/!svn/ver/1463/trunk/psicquic-clustering/src/main/java/org/hupo/psi/mi/psicquic/clustering/job/batch/PsicquicClustererTasklet.java
+END
