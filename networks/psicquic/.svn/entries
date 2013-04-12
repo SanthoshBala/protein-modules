@@ -1,73 +1,0 @@
-10
-
-dir
-1777
-http://psicquic.googlecode.com/svn/trunk
-http://psicquic.googlecode.com/svn
-
-
-
-2013-01-11T11:24:00.366563Z
-1777
-mdumousseau@yahoo.com
-has-props
-
-
-
-
-
-
-
-
-
-
-
-
-
-93d4d546-b555-11dd-8a29-f5523fe3ac2b
-
-psicquic-view
-dir
-
-psicquic-mitab-analysis
-dir
-
-psicquic-client
-dir
-
-psicquic-clustering
-dir
-
-psicquic-solr
-dir
-
-psicquic-stats-collector
-dir
-
-psicquic-solr-server
-dir
-
-psicquic-registry-client
-dir
-
-psicquic-solr-client
-dir
-
-psicquic-webservice
-dir
-
-psicquic-simple-client
-dir
-
-psicquic-cytoscape-client
-dir
-
-psicquic-solr-ws
-dir
-
-psicquic-registry
-dir
-
-psicquic-api
-dir
-
