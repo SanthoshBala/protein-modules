@@ -3,11 +3,8 @@
 % Created: April 11, 2013
 % Last Modified: April 11, 2013
 
-function [ eigenvalues, eigenvectors ] = pca( inFilePath, inFileName )
+function [ eigenvalues, eigenvectors ] = pca( M )
 
-    % Get Matrix
-    M = importdata(strcat(inFilePath, inFileName));
-    
     % Get Size of Matrix
     [~, columns] = size(M);
     

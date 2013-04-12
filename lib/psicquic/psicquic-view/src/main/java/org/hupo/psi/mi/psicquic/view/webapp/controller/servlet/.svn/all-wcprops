@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svn/!svn/ver/1482/trunk/psicquic-view/src/main/java/org/hupo/psi/mi/psicquic/view/webapp/controller/servlet
+END
+AppMainHeaderServlet.java
+K 25
+svn:wc:ra_dav:version-url
+V 134
+/svn/!svn/ver/1482/trunk/psicquic-view/src/main/java/org/hupo/psi/mi/psicquic/view/webapp/controller/servlet/AppMainHeaderServlet.java
+END
+AppHeaderSpecificServlet.java
+K 25
+svn:wc:ra_dav:version-url
+V 138
+/svn/!svn/ver/1482/trunk/psicquic-view/src/main/java/org/hupo/psi/mi/psicquic/view/webapp/controller/servlet/AppHeaderSpecificServlet.java
+END
+AppMainFooterServlet.java
+K 25
+svn:wc:ra_dav:version-url
+V 134
+/svn/!svn/ver/1482/trunk/psicquic-view/src/main/java/org/hupo/psi/mi/psicquic/view/webapp/controller/servlet/AppMainFooterServlet.java
+END

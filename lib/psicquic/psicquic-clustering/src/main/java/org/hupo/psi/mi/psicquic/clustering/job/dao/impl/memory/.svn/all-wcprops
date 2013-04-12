@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/svn/!svn/ver/747/trunk/psicquic-clustering/src/main/java/org/hupo/psi/mi/psicquic/clustering/job/dao/impl/memory
+END
+InMemoryJobDao.java
+K 25
+svn:wc:ra_dav:version-url
+V 133
+/svn/!svn/ver/747/trunk/psicquic-clustering/src/main/java/org/hupo/psi/mi/psicquic/clustering/job/dao/impl/memory/InMemoryJobDao.java
+END
+InMemoryClusteringServiceDaoFactory.java
+K 25
+svn:wc:ra_dav:version-url
+V 154
+/svn/!svn/ver/648/trunk/psicquic-clustering/src/main/java/org/hupo/psi/mi/psicquic/clustering/job/dao/impl/memory/InMemoryClusteringServiceDaoFactory.java
+END
+FileBasedJobDao.java
+K 25
+svn:wc:ra_dav:version-url
+V 134
+/svn/!svn/ver/648/trunk/psicquic-clustering/src/main/java/org/hupo/psi/mi/psicquic/clustering/job/dao/impl/memory/FileBasedJobDao.java
+END

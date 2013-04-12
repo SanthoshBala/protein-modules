@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/!svn/ver/1572/trunk/psicquic-solr/src/test/java/org/hupo/psi/mi/psicquic/model
+END
+PsicquicSolrServerTest.java
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/!svn/ver/1572/trunk/psicquic-solr/src/test/java/org/hupo/psi/mi/psicquic/model/PsicquicSolrServerTest.java
+END
+PsicquicSearchResultsTest.java
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/svn/!svn/ver/1249/trunk/psicquic-solr/src/test/java/org/hupo/psi/mi/psicquic/model/PsicquicSearchResultsTest.java
+END
+MitabInputStreamTest.java
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/svn/!svn/ver/1264/trunk/psicquic-solr/src/test/java/org/hupo/psi/mi/psicquic/model/MitabInputStreamTest.java
+END

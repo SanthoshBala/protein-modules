@@ -28,8 +28,11 @@ from graphs.graphUtil import *
 
 PATH_TO_PCA_ANALYSIS = PATH_TO_ANALYSIS + 'pca/'
 GENE_ASSAY_FILENAME = 'tissue.gene.assay.matrix'
+SHUFFLED_GENE_ASSAY_FILENAME = 'shuffled.tissue.gene.assay.matrix'
 PPI_ASSAY_FILENAME = 'tissue.ppi.assay.matrix'
+SHUFFLED_PPI_ASSAY_FILENAME = 'shuffled.tissue.ppi.assay.matrix'
 MODULE_ASSAY_FILENAME = 'tissue.module.assay.matrix'
+SHUFFLED_MODULE_ASSAY_FILENAME = 'shuffled.tissue.module.assay.matrix'
 
 # Tissue List with Random Order
 RANDOM_TISSUE_LIST = [
@@ -114,6 +117,7 @@ RANDOM_TISSUE_LIST = [
     'kidney'    
     ]
 
+
 # - - - - - - - - - - ASSAY MATRIX CREATION - - - - - - - - - - #
 
 
@@ -128,7 +132,7 @@ def createGeneAssayMatrix():
     # Open Output File
     outFile = open(PATH_TO_PCA_ANALYSIS + GENE_ASSAY_FILENAME, 'w')
 
-    # Iterate through <gtmDB>
+    # Iterate through <ngtmDB>
     for geneRecord in ngtmDB.find():
 
         geneTissues = geneRecord.get('tissue_list')
@@ -168,6 +172,8 @@ def createPPIAssayMatrix():
     ngtmDB = db.normGeneTissueMap
 
     # Open Output File
+    outFile = open(PATH_TO_PCA_ANALYSIS + GENE_ASSAY_FILENAME, 'w')
+
     outFile = open(PATH_TO_PCA_ANALYSIS + PPI_ASSAY_FILENAME, 'w')
 
     # Get Global Graph Interaction Set
@@ -222,7 +228,7 @@ def createModuleAssayMatrix():
     modDB = db.modules
 
     # Open Output File
-    outFile = open(PATH_TO_PCA_ANALYSIS + MODULE_ASSAY_FILENAME, 'w')
+    outFile = open(PATH_TO_PCA_ANALYSIS + GENE_ASSAY_FILENAME, 'w')
 
     numModules = modDB.count()
 
@@ -254,3 +260,31 @@ def createModuleAssayMatrix():
     cli.close()
 
     return
+
+
+# - - - - - - - - - - SHUFFLED MATRIX CREATION - - - - - - - - - - #
+
+
+
+# createShuffledGeneAssayMatrix: Creates gene assay matrix using shuffled
+# tissue labels by aligning FUNCTIONAL and RANDOM tissue lists.
+def createShuffledGeneAssayMatrix():
+    # Open DB Connection
+    cli = MongoClient()
+    db = cli.db
+    ngtmDB = db.normGeneTissueMap
+
+    # Open Output File
+    outFile = open(PATH_TO_PCA_ANALYSIS + SHUFFLED_GENE_ASSAY_FILENAME, 'w')
+
+    # Iterate through <ngtmDB>
+    for geneRecord in ngtmDB.find():
+        
+        geneTissues = geneRecord.get('tissue_list')
+
+        # Iterate through Tissues
+        numTissues = len(RANDOM_TISSUE_LIST)
+        for i in range(numTissues):
+            tissue = Ran
+            
+        

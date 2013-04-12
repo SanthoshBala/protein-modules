@@ -1,0 +1,17 @@
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/1285/trunk/psicquic-solr/src/main/resources
+END
+solr.war
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/1123/trunk/psicquic-solr/src/main/resources/solr.war
+END
+log4j.properties
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/!svn/ver/1283/trunk/psicquic-solr/src/main/resources/log4j.properties
+END

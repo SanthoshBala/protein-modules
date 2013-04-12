@@ -1,0 +1,10 @@
+K 10
+svn:ignore
+V 19
+*.iml
+
+*.ipr
+
+*.db
+
+END

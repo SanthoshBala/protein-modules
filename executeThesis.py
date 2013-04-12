@@ -43,7 +43,7 @@ from modules.moduleTopology import *
 # presence/absence instead of raw expression values.
 def createAndAnalyzeGeneTissueMap(outFile):
     
-    dropGeneTissueMapDBs()
+    #dropGeneTissueMapDBs()
 
     # Generate Tissue:Gene Map
     # Go from { tissue : { 123_at : 123, 234_at : 234, ...}, ... } to
@@ -52,7 +52,7 @@ def createAndAnalyzeGeneTissueMap(outFile):
     outFile.write('Creating Tissue:Gene Map...\n')
     outFile.write('\tWarning: Will take ~10 hours. Printing progress...\n')
     
-    createTissueGeneMap()
+    #parallelizeTaskByTissue(createTissueGeneMap)
 
     elapsedTime = time.time() - startTime
     h, m, s = hoursMinutesSeconds(elapsedTime)
@@ -392,4 +392,4 @@ def main():
     createAndAnalyzeGeneTissueMap(f)
     return
 
-main()
+

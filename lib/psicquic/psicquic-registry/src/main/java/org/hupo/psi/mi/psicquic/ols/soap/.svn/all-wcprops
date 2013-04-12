@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/!svn/ver/316/trunk/psicquic-registry/src/main/java/org/hupo/psi/mi/psicquic/ols/soap
+END
+Query.java
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/!svn/ver/316/trunk/psicquic-registry/src/main/java/org/hupo/psi/mi/psicquic/ols/soap/Query.java
+END
+QueryService.java
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svn/!svn/ver/316/trunk/psicquic-registry/src/main/java/org/hupo/psi/mi/psicquic/ols/soap/QueryService.java
+END
+QueryServiceLocator.java
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/svn/!svn/ver/316/trunk/psicquic-registry/src/main/java/org/hupo/psi/mi/psicquic/ols/soap/QueryServiceLocator.java
+END
+OntologyQuerySoapBindingStub.java
+K 25
+svn:wc:ra_dav:version-url
+V 123
+/svn/!svn/ver/316/trunk/psicquic-registry/src/main/java/org/hupo/psi/mi/psicquic/ols/soap/OntologyQuerySoapBindingStub.java
+END

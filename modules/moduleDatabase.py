@@ -21,6 +21,15 @@ from graphs.graphIO import *
 from graphs.graphUtil import *
 
 
+# - - - - - - - - - - LOCAL SETTINGS - - - - - - - - - - #
+
+
+SHUFFLE_SPICI_MODULES_BASE_FILENAME = 'shuffle.%s.modules'
+PATH_TO_SHUFFLE_SPICI_MODULES = PATH_TO_MODULES + 'shuffle_spici_modules/'
+SHUFFLE_MODULE_IDS_BASE_FILENAME = 'shuffle.%s.module.ids'
+PATH_TO_SHUFFLE_MODULE_IDS = PATH_TO_MODULES + 'shuffle_module_ids/'
+
+
 # - - - - - - - - - - RAW MODULE FILE CREATION - - - - - - - - - - #
 
 
@@ -28,38 +37,45 @@ from graphs.graphUtil import *
 # raw output of SPICi. These are later converted to files of just module_ids.
 
 # createAllRawModuleFiles: Creates raw module files for all tissues.
-def createAllRawModuleFiles():
+def createAllRawModuleFiles(shuffleVal = False):
     # Iterate through Tissues
     for tissue in AUGMENTED_TISSUE_LIST:
         if PRINT_PROGRESS:
             print tissue
-        createTissueRawModuleFile(tissue)
+        createTissueRawModuleFile(tissue, shuffle = shuffleVal)
 
     return
 
 # createTissueRawModuleFile: Creates raw module file for <tissue>.
-def createTissueRawModuleFile(tissue):
+def createTissueRawModuleFile(tissue, shuffle = False):
     # Get Filename for Tissue Graph
-    inFilename = GENEMANIA_TISSUE_BASE_FILENAME % \
-        (tissue, DESIRED_INTERACTION_TYPE)
+    if shuffle:
+        inFilePath = PATH_TO_SHUFFLE_TISSUE_SUBGRAPHS
+        inFileName = SHUFFLE_TISSUE_SUBGRAPH_BASE_FILENAME % tissue
+    else:
+        inFilePath = PATH_TO_GENEMANIA_TISSUE_SUBGRAPHS
+        inFileName = GENEMANIA_TISSUE_BASE_FILENAME % (tissue, 'ppi')
 
     # Convert Genemania to SPICi Format
-    canonicalizeGenemaniaGraph(inFilename)
-    canonFilename = CANON_GENEMANIA_TISSUE_BASE_FILENAME % \
-        (tissue, DESIRED_INTERACTION_TYPE)
-    inFilePath = PATH_TO_TISSUE_SUBGRAPHS + canonFilename
+    canonicalizeGenemaniaGraph(inFilePath, inFileName)
+    canonFileName = 'canon.' + inFileName
+    inFile = inFilePath + canonFileName
     
     # Open Raw Module File Path
-    outFilename = TISSUE_SPICI_MODULES_BASE_FILENAME % tissue
-    outFilePath = PATH_TO_TISSUE_SPICI_MODULES + outFilename
+    if shuffle:
+        outFileName = SHUFFLE_SPICI_MODULES_BASE_FILENAME % tissue
+        outFilePath = PATH_TO_SHUFFLE_SPICI_MODULES + outFileName
+    else:
+        outFileName = TISSUE_SPICI_MODULES_BASE_FILENAME % tissue
+        outFilePath = PATH_TO_TISSUE_SPICI_MODULES + outFileName
 
     # Run SPICi
-    command = [ PATH_TO_SPICI_BINARY, '-i', inFilePath, '-o', outFilePath, 
+    command = [ PATH_TO_SPICI_BINARY, '-i', inFile, '-o', outFilePath, 
                 '-s', str(MODULE_SIZE_THRESHOLD),'-m', '2']
     subprocess.call(command)
 
     # Remove canonical input file
-    os.chdir(PATH_TO_TISSUE_SUBGRAPHS)
+    os.chdir(inFilePath)
     os.remove(canonFilename)
 
     return
@@ -86,11 +102,14 @@ def createGraphRawModuleFile(graph, outputPath):
 
 
 # createModuleDB: Creates <modules> a database for all modules.
-def createModuleDB:
+def createModuleDB(shuffle = False):
     # Open DB Connection
     cli = MongoClient()
     db = cli.db
-    modDB = db.modules
+    if shuffle:
+        modDB = db.shuffleModules
+    else:
+        modDB = db.modules
 
     # Create Number System for Modules: MOD960600000000
     moduleNum = 0
@@ -101,9 +120,13 @@ def createModuleDB:
             print tissue
 
         # Open Tissue Modules File
-        inFileName = TISSUE_SPICI_MODULES_BASE_FILENAME % tissue
-        inFilePath = PATH_TO_TISSUE_SPICI_MODULES + inFileName
-        inFile = open(inFilePath, 'r')
+        if shuffle:
+            inFileName = SHUFFLE_SPICI_MODULES_BASE_FILENAME % tissue
+            inFilePath = PATH_TO_SHUFFLE_SPICI_MODULES
+        else:
+            inFileName = TISSUE_SPICI_MODULES_BASE_FILENAME % tissue
+            inFilePath = PATH_TO_TISSUE_SPICI_MODULES
+        inFile = open(inFilePath + inFileName, 'r')
 
         # Iterate through File
         for line in inFile:
@@ -130,7 +153,7 @@ def createModuleDB:
                         'gene_list' : geneList,
                         'tissue_list' : [ tissue ],
                         'module_id' : moduleID
-                              } )
+                        } )
 
         # Close File
         inFile.close()
@@ -141,11 +164,14 @@ def createModuleDB:
     return
 
 # createModuleGermLayerField: Adds 'germ_layer' field to modDB.
-def createModuleGermLayerField():
+def createModuleGermLayerField(shuffle = False):
     # Open DB Connection
     cli = MongoClient()
     db = cli.db
-    modDB = db.modules
+    if shuffle:
+        modDB = db.modules
+    else:
+        modDB = db.shuffleModules
 
     # Iterate through DB
     for moduleRecord in modDB.find(snapshot = True):
@@ -170,12 +196,16 @@ def createModuleGermLayerField():
 
 # createModuleGeneUniversalityField: Adds 'gene_universality' to modDB. 
 # 'gene_universality' is float representing % of tissues holding genes.
-def createModuleGeneUniversalityField():
+def createModuleGeneUniversalityField(shuffle = False):
     # Open DB Connection
     cli = MongoClient()
     db = cli.db
-    modDB = db.modules
-    ngtmDB = db.normGeneTissueMap
+    if shuffle:
+        modDB = db.shuffleModules
+        gtmDB = db.shuffleGeneTissueMap
+    else:
+        modDB = db.modules
+        gtmDB = db.normGeneTissueMap
 
     # Iterate through DB
     for moduleRecord in modDB.find(snapshot = True):
@@ -190,7 +220,7 @@ def createModuleGeneUniversalityField():
         # Get Mean # of Tissues
         tissueSum = 0
         for geneID in geneList:
-            geneRecord = ngtmDB.find_one( { 'primary_gene_id' : geneID } )
+            geneRecord = gtmDB.find_one( { 'primary_gene_id' : geneID } )
             if not geneRecord:
                 continue
             numTissues = len(geneRecord.get('tissue_list'))
@@ -208,14 +238,18 @@ def createModuleGeneUniversalityField():
     return
 
 
-# createModuleHousekeepingIndexField: Adds 'housekeeping' to modDB. 'housekeeping'
-# represents the % of genes in module that are housekeeping genes.
-def createModuleHousekeepingIndexField():
+# createModuleHousekeepingIndexField: Adds 'housekeeping' to modDB. 
+# 'housekeeping' represents the % of genes in module that are housekeeping.
+def createModuleHousekeepingIndexField(shuffle = False):
     # Open DB Connection
     cli = MongoClient()
     db = cli.db
-    modDB = db.modules
-    ngtmDB = db.normGeneTissueMap
+    if shuffle:
+        modDB = db.shuffleModules
+        gtmDB = db.shuffleGeneTissueMap
+    else:
+        modDB = db.modules
+        gtmDB = db.normGeneTissueMap
 
     # Iterate through DB
     for moduleRecord in modDB.find(snapshot = True):
@@ -251,12 +285,16 @@ def createModuleHousekeepingIndexField():
 
 # createGeneModuleMap: Creates <geneModuleMap>, which contains modules to
 # which each gene belongs in each tissue.
-def constructGeneModuleMap():
+def constructGeneModuleMap(shuffle = False):
     # Open DB Connection
     cli = MongoClient()
     db = cli.db
-    modDB = db.modules
-    geneModMap = db.geneModuleMap
+    if shuffle:
+        modDB = db.modules
+        geneModMap = db.geneModuleMap
+    else:
+        modDB = db.shuffleModules
+        geneModMap = db.shuffleGeneModuleMap
 
     # Iterate through Modules
     for moduleRecord in modDB.find():
@@ -289,26 +327,39 @@ def constructGeneModuleMap():
 # Module ID files contain a list of module IDs, with one per line.
 
 # createAllModuleIDFiles: Creates module ID files for all tissues.
-def createAllModuleIDFiles():
+def createAllModuleIDFiles(shuffleVal = False):
     for tissue in AUGMENTED_TISSUE_LIST:
         if PRINT_PROGRESS:
             print tissue
-        createTissueModuleIDFile(tissue)
+        createTissueModuleIDFile(tissue, shuffle = shuffleVal)
 
 # createTissueModuleIDFile: Creates module ID file for <tissue>.
-def createTissueModuleIDFile(tissue):
+def createTissueModuleIDFile(tissue, shuffle = False):
     # Open DB Connection
     cli = MongoClient()
     db = cli.db
-    modDB = db.modules
+    if shuffle:
+        modDB = db.shuffleModules
+    else:
+        modDB = db.modules
 
     # Open Raw File
-    inFileName = TISSUE_SPICI_MODULES_BASE_FILENAME % tissue
-    inFile = open(PATH_TO_SPICI_MODULES + inFileName, 'r')
+    if shuffle:
+        inFilePath = PATH_TO_SHUFFLE_MODULES
+        inFileName = SHUFFLE_SPICI_MODULES_BASE_FILENAME % tissue
+    else:
+        inFilePath = PATH_TO_TISSUE_SPICI_MODULES
+        inFileName = TISSUE_SPICI_MODULES_BASE_FILENAME % tissue
+    inFile = open(inFilePath + inFileName, 'r')
 
     # Open Output File
-    outFileName = TISSUE_MODULE_IDS_BASE_FILENAME % tissue
-    outFile = open(PATH_TO_TISSUE_MODULE_IDS + outFileName, 'w')
+    if shuffle:
+        outFilePath = PATH_TO_SHUFFLE_MODULE_IDS
+        outFileName = SHUFFLE_MODULE_IDS_BASE_FILENAME % tissue
+    else:
+        outFilePath = PATH_TO_TISSUE_MODULE_IDS
+        outFileName = TISSUE_MODULE_IDS_BASE_FILENAME % tissue
+    outFile = open(outFilePath + outFileName, 'w')
 
     # Iterate through Raw File
     for line in inFile:

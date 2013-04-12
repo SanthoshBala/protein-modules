@@ -1,0 +1,11 @@
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/1150/trunk/psicquic-solr-ws/src/test/resources/samples
+END
+sampleFileNegative.txt
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/!svn/ver/1150/trunk/psicquic-solr-ws/src/test/resources/samples/sampleFileNegative.txt
+END

@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/!svn/ver/1463/trunk/psicquic-clustering/src/main/java/org/hupo/psi/mi/psicquic/clustering/job
+END
+JobIdGenerator.java
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/svn/!svn/ver/438/trunk/psicquic-clustering/src/main/java/org/hupo/psi/mi/psicquic/clustering/job/JobIdGenerator.java
+END
+JobStatus.java
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/svn/!svn/ver/459/trunk/psicquic-clustering/src/main/java/org/hupo/psi/mi/psicquic/clustering/job/JobStatus.java
+END
+PollResult.java
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/svn/!svn/ver/436/trunk/psicquic-clustering/src/main/java/org/hupo/psi/mi/psicquic/clustering/job/PollResult.java
+END
+JobNotCompletedException.java
+K 25
+svn:wc:ra_dav:version-url
+V 127
+/svn/!svn/ver/436/trunk/psicquic-clustering/src/main/java/org/hupo/psi/mi/psicquic/clustering/job/JobNotCompletedException.java
+END
+ClusteringJob.java
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svn/!svn/ver/442/trunk/psicquic-clustering/src/main/java/org/hupo/psi/mi/psicquic/clustering/job/ClusteringJob.java
+END

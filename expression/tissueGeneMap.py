@@ -78,8 +78,7 @@ def createTissueGeneMap(skipVal = 0, limitVal = 80):
                         record[nomenclature].update( { gene : [ expression ] } )
         tissueGeneMap.save(record)
         
-    # Close File and DB Connection
-    outFile.close()
+    # Close DB Connection
     cli.close()
 
     return
@@ -101,10 +100,10 @@ def normalizeTissueGeneMap(skipVal = 0, limitVal = 80):
         # Iterate through Genes and Normalize
         for nomenclature in TISSUE_GENE_MAP_NOMENCLATURES:
             record.update( { nomenclature : {} } )
-            nomenclatureDict = tissue.get(nomenclature)
+            nomenclatureDict = tissueRecord.get(nomenclature)
 
             for gene, expressionVals in nomenclatureDict.iteritems():
-                med = median(expressionVals)
+                value = median(expressionVals)
                 record[nomenclature].update( { gene : value } )
                 
         normTissueGeneMap.save(record)
@@ -141,7 +140,7 @@ def analyzeTissueGeneMap():
             expressedGenes = set()
             unexpressedGenes = set()
             ambiguousGenes = set()
-            nomenclatureDict = tissue.get(nomenclature)
+            nomenclatureDict = tissueRecord.get(nomenclature)
 
             # Iterate through Genes
             for gene, expressionList in nomenclatureDict.iteritems():

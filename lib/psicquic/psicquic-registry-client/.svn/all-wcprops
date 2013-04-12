@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/1514/trunk/psicquic-registry-client
+END
+soapui.log
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/299/trunk/psicquic-registry-client/soapui.log
+END
+osgi.bnd
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/536/trunk/psicquic-registry-client/osgi.bnd
+END
+pom.xml
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/1514/trunk/psicquic-registry-client/pom.xml
+END
+soapui-errors.log
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/299/trunk/psicquic-registry-client/soapui-errors.log
+END

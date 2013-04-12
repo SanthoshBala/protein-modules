@@ -7,7 +7,8 @@
 
 
 # Python Imports
-import os
+from os import *
+from random import *
 
 # Library Imports
 from pymongo import *
@@ -174,6 +175,50 @@ def getGeneOrganSystemHistogram():
 
     # Close File and DB Connection
     outFile.close()
+    cli.close()
+
+    return
+
+
+# - - - - - - - - - - SHUFFLED GENE TISSUE MAP - - - - - - - - - - #
+
+
+# shuffledGeneTissueMap: Shuffles gene tissue map, relabeling the tissues in
+# which any given protein is expressed, but maintaining probability of being
+# in any given tissues. Thus, tissue-specific proteins remain tissue-specific,
+# and housekeeping proteins remain housekeeping.
+def shuffleGeneTissueMap():
+    # Open DB Connection
+    cli = MongoClient()
+    db = cli.db
+    normGTM = db.normGeneTissueMap
+    shuffleGTM = db.shuffleGeneTissueMap
+
+    # Iterate through <normGTM>
+    for geneRecord in normGTM.find():
+        normGeneID = geneRecord.get('gene_id')
+        normTissueList = geneRecord.get('tissue_list')
+        shuffleGeneID = normGeneID
+        shuffleTissueList = []
+
+        # Get Probability of Expression
+        numTissues = len(normTissueList)
+        expressionProb = numTissues/float(len(FUNCTIONAL_TISSUE_LIST))
+        
+        # Randomly Assign Tissues
+        for tissue in FUNCTIONAL_TISSUE_LIST:
+            sample = random()
+            if sample < expressionProb:
+                shuffleTissueList.append(tissue)
+
+        record = { 
+            'gene_id' : shuffleGeneID,
+            'tissue_list' : shuffleTissueList,
+            }
+
+        shuffleGTM.save(record)
+
+    # Close DB Connection
     cli.close()
 
     return

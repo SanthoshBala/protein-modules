@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/!svn/ver/1005/trunk/psicquic-solr-server/src/main/webapp/solr/psq-02/conf/xslt
+END
+luke.xsl
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/!svn/ver/1005/trunk/psicquic-solr-server/src/main/webapp/solr/psq-02/conf/xslt/luke.xsl
+END
+example_rss.xsl
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/!svn/ver/1005/trunk/psicquic-solr-server/src/main/webapp/solr/psq-02/conf/xslt/example_rss.xsl
+END
+updateXml.xsl
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/!svn/ver/1005/trunk/psicquic-solr-server/src/main/webapp/solr/psq-02/conf/xslt/updateXml.xsl
+END
+example_atom.xsl
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/!svn/ver/1005/trunk/psicquic-solr-server/src/main/webapp/solr/psq-02/conf/xslt/example_atom.xsl
+END
+example.xsl
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/!svn/ver/1005/trunk/psicquic-solr-server/src/main/webapp/solr/psq-02/conf/xslt/example.xsl
+END

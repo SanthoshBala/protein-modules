@@ -28,6 +28,9 @@ PATH_TO_GENEMANIA_NETWORKS = PATH_TO_NETWORKS + 'genemania/Homo_sapiens.COMBINED
 PATH_TO_GLOBAL_GRAPH = PATH_TO_GENEMANIA_NETWORKS + 'interaction_types/'
 GLOBAL_GRAPH_FILENAME = 'combined.ppi.network'
 
+PATH_TO_SHUFFLE_TISSUE_SUBGRAPHS = PATH_TO_GENEMANIA_NETWORKS + 'shuffle/'
+SHUFFLE_TISSUE_SUBGRAPH_BASE_FILENAME = 'shuffle.%s.combined.ppi.network'
+
 
 # - - - - - - - - - - TISSUE SUBGRAPHS - - - - - - - - - - #
 
@@ -56,26 +59,45 @@ def createAllTissueSubgraphs():
 
 # createGlobalSubgraph: Automates creating copy of global graph in tissue
 # subgraph directory to simplify downstream iteration through tissues.
-def createGlobalSubgraph():
+# If <shuffle>, uses the randomized tissue expression.
+def createGlobalSubgraph(shuffle = False):
     oldFilePath = PATH_TO_GLOBAL_GRAPH + GLOBAL_GRAPH_FILENAME
-    newFileName = 'global.' + GLOBAL_GRAPH_FILENAME
-    newFilePath = PATH_TO_TISSUE_SUBGRAPHS + newFileName
+
+    if shuffle:
+        newFileName = SHUFFLE_TISSUE_SUBGRAPH_BASE_FILENAME % 'global'
+        newFilePath = PATH_TO_SHUFFLE_TISSUE_SUBGRAPHS + newFileName
+    else:
+        newFileName = 'global.' + GLOBAL_GRAPH_FILENAME
+        newFilePath = PATH_TO_TISSUE_SUBGRAPHS + newFileName
 
     shutil.copy(oldFilePath, newFilePath)
     
     return
 
 # createIntersectionSubgraph: Creates graph that represents intersection
-# of all tissue-specific subgraphs.
-def createIntersectionSubgraph():
+# of all tissue-specific subgraphs. If <shuffle>, uses randomized tissue
+# expression.
+def createIntersectionSubgraph(shuffle = False):
     # Open DB Connection
     cli = MongoClient()
     db = cli.db
-    ngtmDB = db.normGeneTissueMap
+    if shuffle:
+        gtmDB = db.shuffleGeneTissueMap
+    else:
+        gtmDB = db.normGeneTissueMap
 
     # Open Input File
     inFile = open(PATH_TO_GLOBAL_GRAPH + GLOBAL_GRAPH_FILENAME, 'r')
 
+    # Open Output File
+    if shuffle:
+        outFilePath = PATH_TO_SHUFFLE_TISSUE_SUBGRAPHS
+        outFileName = SHUFFLE_TISSUE_SUBGRAPH_BASE_FILENAME
+    else:
+        outFilePath = PATH_TO_TISSUE_SUBGRAPHS
+        outFileName = GENEMANIA_TISSUE_BASE_FILENAME % ('intersection', 'ppi')
+    outFile = open(outFilePath + outFileName, 'w')
+        
     numTissues = len(FUNCTIONAL_TISSUE_LIST)
 
     headerLine = True
@@ -94,8 +116,8 @@ def createIntersectionSubgraph():
         confidence = lineTabFields[2]
         
         # If 1 of genes not in all tissues, continue
-        recordA = ngtmDB.find_one( { 'gene_id' : geneA } )
-        recordB = ngtmDB.find_one( { 'gene_id' : geneB } )
+        recordA = gtmDB.find_one( { 'gene_id' : geneA } )
+        recordB = gtmDB.find_one( { 'gene_id' : geneB } )
         if not recordA or not recordB:
             continue
 
@@ -110,25 +132,34 @@ def createIntersectionSubgraph():
 
     # Close File and DB Connection
     inFile.close()
+    outFile.close()
     cli.close()
 
     return
 
 # createTissueSubgraph: Creates subgraph for <tissue> from global graph.
-def createTissueSubgraph(tissue):
+# If <shuffle>, uses randomized tissue expression.
+def createTissueSubgraph(tissue, shuffle = False):
     # Open DB Connection
     cli = MongoClient()
     db = cli.db
-    ntgmDB = db.normTissueGeneMap
+    if shuffle:
+        gtmDB = db.shuffleGeneTissueMap
+    else:
+        gtmDB = db.normGeneTissueMap
 
     # Open Input File
     inFile = open(PATH_TO_GLOBAL_GRAPH + GLOBAL_GRAPH_FILENAME, 'r')
-    outFile = open(PATH_TO_TISSUE_SUBGRAPHS + tissue + '.' + 
-                   GLOBAL_GRAPH_FILENAME)
 
-    tissueRecord = ntgmDB.find_one( { 'tissue' : tissue } )
-    geneDict = tissueRecord.get(DESIRED_NOMENCLATURE)
-    
+    # Open Output File
+    if shuffle:
+        outFilePath = PATH_TO_SHUFFLE_TISSUE_SUBGRAPHS
+        outFileName = SHUFFLE_TISSUE_SUBGRAPH_BASE_FILENAME % (tissue, 'ppi')
+    else:
+        outFilePath = PATH_TO_TISSUE_SUBGRAPHS
+        outFileName = GENEMANIA_TISSUE_BASE_FILENAME % (tissue, 'ppi')
+    outFile = open(outFilePath + outFileName, 'w')
+
     headerLine = True
 
     # Iterate through <inFile>
@@ -144,10 +175,18 @@ def createTissueSubgraph(tissue):
         geneB = lineTabFields[1]
         confidence = lineTabFields[2]
         
-        # If 1 of genes not in tissue, continue
-        if geneDict.get(geneA) < ARRAY_EXPRESSION_THRESHOLD:
+        # Get DB Records
+        recordA = gtmDB.find_one( { 'gene_id' : geneA } )
+        recordB = gtmDB.find_one( { 'gene_id' : geneB } )
+        if (not recordA) or (not recordB):
             continue
-        if geneDict.get(geneB) < ARRAY_EXPRESSION_THRESHOLD:
+
+        tissuesA = recordA.get('tissue_list')
+        tissuesB = recordB.get('tissue_list')
+        
+        if tissue not in tissuesA:
+            continue
+        if tissue not in tissuesB:
             continue
 
         outFile.write(line)
@@ -205,3 +244,4 @@ def createCollapsedTissueSubgraph(tissue):
     return
 
 
+# - - - - - - - - - - TISSUE SUBGRAPH SHUFFLING - - - - - - - - - - #

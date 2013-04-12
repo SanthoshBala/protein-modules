@@ -1,0 +1,17 @@
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/!svn/ver/1445/trunk/psicquic-solr/src/main/java/org/hupo/psi/mi/psicquic/model/server
+END
+SolrHomeBuilder.java
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/!svn/ver/1219/trunk/psicquic-solr/src/main/java/org/hupo/psi/mi/psicquic/model/server/SolrHomeBuilder.java
+END
+SolrJettyRunner.java
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/!svn/ver/1445/trunk/psicquic-solr/src/main/java/org/hupo/psi/mi/psicquic/model/server/SolrJettyRunner.java
+END

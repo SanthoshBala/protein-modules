@@ -165,16 +165,16 @@ def writeGraph(graph, outFilePath, canonical = False, weighted = True):
 
 # canonicalizeGenemaniaGraph: Converts Genemania format into 
 # format recognizable by SPICi, with confidence in 3rd column.
-def canonicalizeGenemaniaGraph(filename):
+def canonicalizeGenemaniaGraph(inFilePath, inFileName):
     # Get Output Path
-    outFilename = 'canon.%s' % filename
-    outFilepath = PATH_TO_CANONICAL_TISSUE_SUBGRAPHS + outFilename
+    outFileName = 'canon.%s' % inFileName
+    outFilePath = inFilePath + outFileName
 
     # Read <filename> into Graph
-    graph = readGraph(filename)
+    graph = readGraph(inFilePath + inFileName)
 
     # Write to Disk
-    writeGraph(graph, outFilepath, canonical = True)
+    writeGraph(graph, outFilePath, canonical = True)
 
     return
 

@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/!svn/ver/1482/trunk/psicquic-view/src/main/webapp/WEB-INF/facelets/components/view
+END
+QueryLink.xhtml
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/!svn/ver/1479/trunk/psicquic-view/src/main/webapp/WEB-INF/facelets/components/view/QueryLink.xhtml
+END
+ImageHierarchView.xhtml
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/!svn/ver/1482/trunk/psicquic-view/src/main/webapp/WEB-INF/facelets/components/view/ImageHierarchView.xhtml
+END
+Dasty.xhtml
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/!svn/ver/603/trunk/psicquic-view/src/main/webapp/WEB-INF/facelets/components/view/Dasty.xhtml
+END
+ImageCompoundStructure.xhtml
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svn/!svn/ver/1482/trunk/psicquic-view/src/main/webapp/WEB-INF/facelets/components/view/ImageCompoundStructure.xhtml
+END
+XrefDataList.xhtml
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svn/!svn/ver/1482/trunk/psicquic-view/src/main/webapp/WEB-INF/facelets/components/view/XrefDataList.xhtml
+END
+XrefDataItem.xhtml
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svn/!svn/ver/1482/trunk/psicquic-view/src/main/webapp/WEB-INF/facelets/components/view/XrefDataItem.xhtml
+END
+DastyHeader.xhtml
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svn/!svn/ver/603/trunk/psicquic-view/src/main/webapp/WEB-INF/facelets/components/view/DastyHeader.xhtml
+END
+SearchBox.xhtml
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svn/!svn/ver/603/trunk/psicquic-view/src/main/webapp/WEB-INF/facelets/components/view/SearchBox.xhtml
+END

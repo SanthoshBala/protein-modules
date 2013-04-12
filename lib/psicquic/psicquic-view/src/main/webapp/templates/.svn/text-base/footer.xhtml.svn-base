@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:tr="http://myfaces.apache.org/trinidad"
+                xmlns:trh="http://myfaces.apache.org/trinidad/html"
+                xmlns:c="http://java.sun.com/jstl/core"
+                xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+                xmlns:ebi="http://ebi.ac.uk/faces/components"
+                xmlns:ebisf="http://www.ebi.ac.uk/faces/site">
+            <div class="footerdiv" id="footerdiv">
+                <div id="footer">
+                    <!-- Optional local footer (insert citation / project-specific copyright / etc here -->
+
+                    <!--<div id="local-footer" class="grid_24 clearfix">-->
+                    <!--</div>-->
+
+                    <!-- End optional local footer -->
+
+                    <div id="global-footer" class="grid_24 clearfix">
+                        <div class="nav" id="global-nav-expanded">
+                            <div class="grid_4 alpha">
+                                <h3 class="embl-ebi"><a href="/" title="Go to the EMBL-EBI homepage">EMBL-EBI</a></h3>
+                            </div>
+                            <div class="grid_4">
+                                <h3 class="services"><a href="/services" title="Services">Services</a></h3>
+                            </div>
+                            <div class="grid_4">
+                                <h3 class="research"><a href="/research" title="Research">Research</a></h3>
+                            </div>
+                            <div class="grid_4">
+                                <h3 class="training"><a href="/training" title="Training">Training</a></h3>
+                            </div>
+                            <div class="grid_4">
+                                <h3 class="industry"><a href="/industry" title="Industry">Industry</a></h3>
+                            </div>
+                            <div class="grid_4 omega">
+                                <h3 class="about"><a href="/about" title="About us">About us</a></h3>
+                            </div>
+                        </div>
+
+                        <div class="section" id="ebi-footer-meta">
+                            <p class="address">EMBL-EBI, Wellcome Trust Genome Campus, Hinxton, Cambridgeshire, CB10 1SD, UK &#160; &#160; +44 (0)1223 49 44 44</p>
+
+                            <p>Copyright &#169; EMBL-EBI 2012 | EBI is an Outstation of the <a
+                                    href="http://www.embl.org">European Molecular Biology Laboratory​</a> | <a href="/about/privacy" title="">Privacy</a> |
+                                <a href="/about/cookies" title="">Cookies</a> | <a href="/about/terms-of-use" title="">Terms of use</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+</ui:composition>

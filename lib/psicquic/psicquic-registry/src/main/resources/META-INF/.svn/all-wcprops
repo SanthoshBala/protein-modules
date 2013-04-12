@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/!svn/ver/1775/trunk/psicquic-registry/src/main/resources/META-INF
+END
+psicquic-registry-test.xml
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/!svn/ver/1775/trunk/psicquic-registry/src/main/resources/META-INF/psicquic-registry-test.xml
+END
+psicquic-registry-default.xml
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/!svn/ver/336/trunk/psicquic-registry/src/main/resources/META-INF/psicquic-registry-default.xml
+END
+beans.spring.xml
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/!svn/ver/1303/trunk/psicquic-registry/src/main/resources/META-INF/beans.spring.xml
+END
+ws.spring.xml
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/!svn/ver/1303/trunk/psicquic-registry/src/main/resources/META-INF/ws.spring.xml
+END
+psicquic.properties
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/!svn/ver/332/trunk/psicquic-registry/src/main/resources/META-INF/psicquic.properties
+END
