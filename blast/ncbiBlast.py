@@ -20,13 +20,32 @@ from common.statistics import *
 
 NCBI_REFSEQ_BASE_STRING = 'ref|%s|'
 PATH_TO_SIMILAR_PROTEIN_ANALYSIS = PATH_TO_MODULE_SIMILARITY + 'exchange/'
+PATH_TO_EXCHANGE_SIMILARITY = PATH_TO_MODULE_SIMILARITY + 'exchange/'
 
 
 # - - - - - - - - - - FUNCTIONS - - - - - - - - - - #
 
-# convertRefseqProteinListToNCBIFormat: Writes a line-separated list of 
+
+# createNCBIBlastInput: Creates all input files for NCBI Blast. <numComponents>
+# is number of connected components in debruijn graph. <numShards> is number
+# of random divisions of protein lists.
+def createNCBIBlastInput(numComponents, numShards):
+    for i in range(numComponents):
+        inFileName = 'debruijn.exchange.proteins.%d' % (i + 1)
+        convertRefSeqProteinListToNCBIFormat(PATH_TO_EXCHANGE_SIMILARITY, \
+                                             inFileName)
+
+    for i in range(numShards):
+        inFileName = 'debruijn.exchange.proteins.shard.%d' % (i + 1)
+        convertRefSeqProteinListToNCBIFormat(PATH_TO_EXCHANGE_SIMILARITY, \
+                                                 inFileName)
+    
+    return
+
+
+# convertRefSeqProteinListToNCBIFormat: Writes a line-separated list of 
 # Refseq Protein IDs in NCBI format for use with Blast.
-def convertRefseqProteinListToNCBIFormat(inFilePath, inFileName):
+def convertRefSeqProteinListToNCBIFormat(inFilePath, inFileName):
     # Open Input File
     inFile = open(inFilePath + inFileName, 'r')
 

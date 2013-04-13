@@ -6,11 +6,11 @@
 function [ eigenvalues, eigenvectors ] = pca( M )
 
     % Get Size of Matrix
-    [~, columns] = size(M);
+    [genes, ~] = size(M);
     
     % Mean-Center Matrix
-    for i = 1:columns
-        M(:,i) = M(:,i) - mean(M(:,i));
+    for i = 1:genes
+        M(i,:) = M(i,:) - mean(M(i,:));
     end
     
     % Get Covariance
