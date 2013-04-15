@@ -12,30 +12,32 @@ function [] = scatterPlot( M )
     X = M(:,1);
     Y = M(:,2);
     
-    handle = scatter(X, Y);
+    handle = scatter(X, Y, 25, 'filled');
     
-    % Marker Color
-    set(handle, 'MarkerEdgeColor', 'b');
-    set(handle, 'MarkerFaceColor', 'b');
-    
-    % Marker Size;
-    set(handle, 'MarkerSize', 10);
-    
-    % Line Width
-    set(handle, 'LineWidth', 2);
-    
-    % Line Style
-    set(handle, 'LineStyle', '.');
-    
-    % Axis Label Fonts
-    set(handle, 'FontName', 'Helvetica');
+    % Marker
+    set(handle, 'MarkerEdgeColor', [0.2, 0.2, 1.0]);
+    set(handle, 'MarkerFaceColor', [0.2, 0.2, 1.0]);
     
     % Title
-    set(handle, 'Title', 'Scatter Plot');
+    title('Scatter Plot', 'fontname', 'Palatino', 'fontsize', 20);
+       
+    % X Axis
+    xlabel('X Axis', 'fontname', 'Palatino', 'fontsize', 20);
+   
+    % Y Axis
+    ylabel('Y Axis', 'fontname', 'Palatino', 'fontsize', 20);
     
+    % Axes
+    set(gca, 'fontname', 'Palatino', 'fontsize', 20);
+    
+    % Line Width
+    
+    % Line Style
+    
+    % Axis Label Fonts
+    
+    % Title
+        
     % Log Scale: linear | log
-    set(handle, 'XScale', 'linear');
-    set(handle, 'YScale', 'linear');
-    set(handle, 'ZScale', 'linear');
     
 end

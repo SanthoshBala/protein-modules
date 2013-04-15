@@ -23,10 +23,8 @@ from common.statistics import *
 TISSUE_GENE_MAP_NOMENCLATURES = [
     'primary_gene_id',
     'ensembl_gene',
-    'unigene_id',
     'entrez_gene',
     'gene_symbol',
-    'gene_title',
 ]
 
 
@@ -111,6 +109,44 @@ def normalizeTissueGeneMap(skipVal = 0, limitVal = 80):
     # Close DB Connection
     cli.close()
     
+    return
+
+
+# shuffleNormTissueGeneMap: Uses shuffleGeneTissueMap to reverse engineer
+# shuffleNormTissueGeneMap.
+def shuffleNormTissueGeneMap():
+    # Open DB Connection
+    cli = MongoClient()
+    db = cli.db
+    ntgmDB = db.shuffleNormTissueGeneMap
+    shuffleGTM = db.shuffleGeneTissueMap
+
+    # Find All Genes for Tissue Above Threshold Expression
+    for tissue in FUNCTIONAL_TISSUE_LIST:
+        if PRINT_PROGRESS:
+            print tissue
+            
+        expressedGenes = shuffleGTM.find( { tissue :
+                                                { '$gt' : 
+                                                  ARRAY_EXPRESSION_THRESHOLD }
+                                            } )
+
+        tissueRecord = {
+            'tissue' : tissue,
+            'primary_gene_id' : {}
+            }
+        
+        nomenclatureDict = tissueRecord.get('primary_gene_id')
+        
+        for geneRecord in expressedGenes:
+            geneID = geneRecord.get('primary_gene_id')
+            nomenclatureDict.update( { geneID : ARRAY_EXPRESSION_THRESHOLD + 1} )
+
+        ntgmDB.save(tissueRecord)
+
+    # Close DB Connection
+    cli.close()
+
     return
 
 

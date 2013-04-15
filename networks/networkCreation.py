@@ -22,45 +22,16 @@ from common.strings import *
 
 # - - - - - - - - - - LOCAL SETTINGS - - - - - - - - - - #
 
-
-PATH_TO_GENEMANIA_NETWORKS = PATH_TO_NETWORKS + 'genemania/Homo_sapiens.COMBINED/'
-
 PATH_TO_GLOBAL_GRAPH = PATH_TO_GENEMANIA_NETWORKS + 'interaction_types/'
 GLOBAL_GRAPH_FILENAME = 'combined.ppi.network'
-
-PATH_TO_SHUFFLE_TISSUE_SUBGRAPHS = PATH_TO_GENEMANIA_NETWORKS + 'shuffle/'
-SHUFFLE_TISSUE_SUBGRAPH_BASE_FILENAME = 'shuffle.%s.combined.ppi.network'
-
 
 # - - - - - - - - - - TISSUE SUBGRAPHS - - - - - - - - - - #
 
 
-# createAllTissueSubgraphs: Creates all tissue subgraphs from global graph,
-# including copying the global graph to new location and creating intersection
-# graph, composed of proteins that are in all tissue-specific networks.
-def createAllTissueSubgraphs():
-    # Create Global Graph
-    createGlobalSubgraph()
-    if PRINT_PROGRESS:
-        print 'global'
-    
-    # Create Intersection Graph
-    createIntersectionSubgraph()
-    if PRINT_PROGRESS:
-        print 'intersection'
-
-    # Print Tissue Subgraphs
-    for tissue in FUNCTIONAL_TISSUE_LIST:
-        createTissueSubgraph(tissue)    
-        if PRINT_PROGRESS:
-            print tissue
-    
-    return
-
-# createGlobalSubgraph: Automates creating copy of global graph in tissue
+# createGlobalNetwork: Automates creating copy of global graph in tissue
 # subgraph directory to simplify downstream iteration through tissues.
 # If <shuffle>, uses the randomized tissue expression.
-def createGlobalSubgraph(shuffle = False):
+def createGlobalNetwork(shuffle = False):
     oldFilePath = PATH_TO_GLOBAL_GRAPH + GLOBAL_GRAPH_FILENAME
 
     if shuffle:
@@ -71,13 +42,16 @@ def createGlobalSubgraph(shuffle = False):
         newFilePath = PATH_TO_TISSUE_SUBGRAPHS + newFileName
 
     shutil.copy(oldFilePath, newFilePath)
-    
+
+    if PRINT_PROGRESS:
+        print 'global'
+
     return
 
-# createIntersectionSubgraph: Creates graph that represents intersection
+# createIntersectionNetwork: Creates graph that represents intersection
 # of all tissue-specific subgraphs. If <shuffle>, uses randomized tissue
 # expression.
-def createIntersectionSubgraph(shuffle = False):
+def createIntersectionNetwork(shuffle = False):
     # Open DB Connection
     cli = MongoClient()
     db = cli.db
@@ -92,7 +66,7 @@ def createIntersectionSubgraph(shuffle = False):
     # Open Output File
     if shuffle:
         outFilePath = PATH_TO_SHUFFLE_TISSUE_SUBGRAPHS
-        outFileName = SHUFFLE_TISSUE_SUBGRAPH_BASE_FILENAME
+        outFileName = SHUFFLE_TISSUE_SUBGRAPH_BASE_FILENAME % ('intersection')
     else:
         outFilePath = PATH_TO_TISSUE_SUBGRAPHS
         outFileName = GENEMANIA_TISSUE_BASE_FILENAME % ('intersection', 'ppi')
@@ -117,14 +91,16 @@ def createIntersectionSubgraph(shuffle = False):
         
         # If 1 of genes not in all tissues, continue
         recordA = gtmDB.find_one( { 'gene_id' : geneA } )
+        if not recordA:
+            continue
         recordB = gtmDB.find_one( { 'gene_id' : geneB } )
-        if not recordA or not recordB:
+        if not recordB:
             continue
 
         tissuesA = recordA.get('tissue_list')
-        tissuesB = recordB.get('tissue_list')
         if len(tissuesA) < numTissues:
             continue
+        tissuesB = recordB.get('tissue_list')
         if len(tissuesB) < numTissues:
             continue
 
@@ -137,20 +113,32 @@ def createIntersectionSubgraph(shuffle = False):
 
     return
 
-# createTissueSubgraph: Creates subgraph for <tissue> from global graph.
-# If <shuffle>, uses randomized tissue expression.
-def createTissueSubgraph(tissue, shuffle = False):
+# createTissueNetworks: Creates all tissue subgraphs from global graph,
+# including copying the global graph to new location and creating intersection
+# graph, composed of proteins that are in all tissue-specific networks.
+def createTissueNetworks(minimum = 0, maximum = 80, shuffleVal = False):
+    # Create Tissue Subgraphs
+    for tissue in FUNCTIONAL_TISSUE_LIST[minimum:maximum]:
+        createTissueNetwork(tissue, shuffle = shuffleVal)    
+        if PRINT_PROGRESS:
+            print tissue
+    
+    return
+
+# createTissueNetwork
+def createTissueNetwork(tissue, shuffle = False):
     # Open DB Connection
     cli = MongoClient()
     db = cli.db
     if shuffle:
-        gtmDB = db.shuffleGeneTissueMap
+        ntgmDB = db.shuffleNormTissueGeneMap
     else:
-        gtmDB = db.normGeneTissueMap
+        ntgmDB = db.normTissueGeneMap
+
 
     # Open Input File
     inFile = open(PATH_TO_GLOBAL_GRAPH + GLOBAL_GRAPH_FILENAME, 'r')
-
+    
     # Open Output File
     if shuffle:
         outFilePath = PATH_TO_SHUFFLE_TISSUE_SUBGRAPHS
@@ -161,6 +149,9 @@ def createTissueSubgraph(tissue, shuffle = False):
     outFile = open(outFilePath + outFileName, 'w')
 
     headerLine = True
+
+    tissueRecord = ntgmDB.find_one( { 'tissue' : tissue } )
+    geneDict = tissueRecord.get('primary_gene_id')
 
     # Iterate through <inFile>
     for line in inFile:
@@ -173,20 +164,13 @@ def createTissueSubgraph(tissue, shuffle = False):
 
         geneA = lineTabFields[0]
         geneB = lineTabFields[1]
-        confidence = lineTabFields[2]
         
         # Get DB Records
-        recordA = gtmDB.find_one( { 'gene_id' : geneA } )
-        recordB = gtmDB.find_one( { 'gene_id' : geneB } )
-        if (not recordA) or (not recordB):
+        expressionA = geneDict.get(geneA)
+        if expressionA <= float(ARRAY_EXPRESSION_THRESHOLD):
             continue
-
-        tissuesA = recordA.get('tissue_list')
-        tissuesB = recordB.get('tissue_list')
-        
-        if tissue not in tissuesA:
-            continue
-        if tissue not in tissuesB:
+        expressionB = geneDict.get(geneB)
+        if expressionB <= float(ARRAY_EXPRESSION_THRESHOLD):
             continue
 
         outFile.write(line)
@@ -197,6 +181,7 @@ def createTissueSubgraph(tissue, shuffle = False):
     cli.close()
 
     return
+    
 
 
 # - - - - - - - - - - COLLAPSED TISSUE SUBGRAPHS - - - - - - - - - - #
@@ -244,4 +229,4 @@ def createCollapsedTissueSubgraph(tissue):
     return
 
 
-# - - - - - - - - - - TISSUE SUBGRAPH SHUFFLING - - - - - - - - - - #
+

@@ -1,0 +1,25 @@
+Creating Global Network...DONE
+Time Elapsed: 0:0:0
+
+Creating Intersection Network...DONE
+Time Elapsed: 0:19:1
+
+Creating Tissue Networks...DONE
+Time Elapsed: 0:0:23
+
+Shuffling Gene Tissue Map...DONE
+Time Elapsed: 0:0:5
+
+Normalizing Shuffled Gene Tissue Map...DONE
+Time Elapsed: 0:0:14
+
+Shuffling Normalized Tissue Gene Map...DONE
+Time Elapsed: 0:0:56
+
+Creating Shuffled Global Network...DONE
+Time Elapsed: 0:0:0
+
+Creating Shuffled Intersection Network...DONE
+Time Elapsed: 3:50:51
+
+Creating Shuffled Tissue Networks...

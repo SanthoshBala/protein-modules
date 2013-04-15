@@ -30,98 +30,45 @@ from expression.geneTissueMap import *
 # Graph Imports
 
 # Networks Imports
+from networks.networkCreation import *
 
 # Modules Imports
 from modules.moduleUtil import *
 from modules.moduleTopology import *
 
+# Analysis Imports
+from analysis.proteomeCoverage import *
 
-
-# createAndAnalyzeGeneTissueMap: Executes all helper functions necessary to
-# generate <tissueGeneMap>, <normTissueGeneMap>, <geneTissueMap>, and 
-# <normGeneTissueMap>. <normGeneTissueMap> is the only DB that deals with
-# presence/absence instead of raw expression values.
-def createAndAnalyzeGeneTissueMap(outFile):
+# analyzeProteomeCoverage: Generates files listing percentage of known
+# proteome that is represented in each tissue network.
+def analyzeProteomeCoverage(outFile):
     
-    #dropGeneTissueMapDBs()
-
-    # Generate Tissue:Gene Map
-    # Go from { tissue : { 123_at : 123, 234_at : 234, ...}, ... } to
-    #         { tissue : { 'entrez_gene' : { gene_id : [ 123, 234], }, }, }
+    # Normal Networks
     startTime = time.time()
-    outFile.write('Creating Tissue:Gene Map...\n')
-    outFile.write('\tWarning: Will take ~10 hours. Printing progress...\n')
-    
-    #parallelizeTaskByTissue(createTissueGeneMap)
+    outFile.write('Analyzing Proteome Coverage...')
+
+    getProteomeCoverage()
 
     elapsedTime = time.time() - startTime
     h, m, s = hoursMinutesSeconds(elapsedTime)
-    outFile.write('\tTime Elapsed: %d:%d:%d\n' % (h,m,s))
     outFile.write('DONE\n\n')
-    outFile.flush()    
-
-    startTime = time.time()
-    outFile.write('Analyzing Tissue:Gene Map...')
-
-    analyzeTissueGeneMap()
-
-    elapsedTime = time.time() - startTime
-    h, m, s = hoursMinutesSeconds(elapsedTime)
-    outFile.write('DONE\n')    
-    outFile.write('\tTime Elapsed: %d:%d:%d\n' % (h,m,s))
-    
+    outFile.write('Time Elapsed: %d:%d:%d\n\n' % (h,m,s))
     outFile.flush()
 
-    # Normalize Tissue:Gene Map
-    # Go from { tissue : { nomenclature : { gene : [1, 2, 3] } } } to
-    #         { tissue : { nomenclature : { gene : 2 } } }
+    # Shuffled Networks
     startTime = time.time()
-    outFile.write('Normalizing Tissue:Gene Map...')
+    outFile.write('Analyzing Shuffled Proteome Coverage...')
 
-    parallelizeTaskByTissue(normalizeTissueGeneMap)
+    getProteomeCoverage(shuffle=True)
 
     elapsedTime = time.time() - startTime
     h, m, s = hoursMinutesSeconds(elapsedTime)
-    outFile.write('DONE\n')
-    outFile.write('\tTime Elapsed: %d:%d:%d\n' % (h,m,s))
-
-    outFile.flush()
-
-    # Create Gene:Tissue Map
-    # Go from { tissue : { nomenclature : { gene : 2 } } } to
-    #         { gene : { tissue : 2 } }
-    startTime = time.time()
-    outFile.write('Creating Gene:Tissue Map...')
-
-    record = MongoClient().db.normTissueGeneMap.find_one()
-    numGenes = len(record.get(GENE_TISSUE_MAP_NOMENCLATURE).keys())
-    parallelizeTaskByItem(createGeneTissueMap, numGenes)
-
-    elapsedTime = time.time() - startTime
-    h, m, s = hoursMinutesSeconds(elapsedTime)
-    outFile.write('DONE\n')    
-    outFile.write('\tTime Elapsed: %d:%d:%d\n' % (h,m,s))
-    
-    outFile.flush()
-
-    # Normalize Gene:Tissue Map
-    # Go from { gene : { tissue : 2 } } to
-    #         { gene : id, tissue_list: [ A, B, C ], }
-    startTime = time.time()
-    outFile.write('Normalizing Gene:Tissue Map...')
-
-    normalizeGeneTissueMap()
-
-    elapsedTime = time.time() - startTime
-    h, m, s = hoursMinutesSeconds(elapsedTime)
-    outFile.write('DONE\n')    
-    outFile.write('\tTime Elapsed: %d:%d:%d\n' % (h,m,s))
-    
+    outFile.write('DONE\n\n')
+    outFile.write('Time Elapsed: %d:%d:%d\n\n' % (h,m,s))
     outFile.flush()
 
     return
-
-
+    
 
 # executeThesis: Executes all helper functions necessary to create databases 
 # and data files for tissue-specific analysis of PPI networks.
@@ -139,37 +86,28 @@ def executeThesis():
     outFile.flush()
 
     # Create/Analyze Gene Nomenclature DBs
-    createAndAnalyzeNomenclatureDBs()
+    createAndAnalyzeNomenclatureDBs(outFile)
 
     # Create/Analyze Probe:Gene Map
-    createAndAnalyzeProbeGeneMap()
+    createAndAnalyzeProbeGeneMap(outFile)
 
     # Create/Analyze Tissue:Probe Map
-    createAndAnalyzeTissueProbeMap()
+    createAndAnalyzeTissueProbeMap(outFile)
 
+    # Create/Analyze Gene:Tissue Map
+    createAndAnalyzeGeneTissueMap(outFile)
+
+    # Create Global, Intersection, and Tissue Networks
+    createGlobalAndTissueNetworks(outFile)
+
+    # Shuffle Gene Expression Data
+    shuffleGeneExpression(outFile)
+
+    # Create Shuffled Global, Intersection, and Tissue Networks
+    createShuffledNetworks(outFile)
     
-
-
-
-    # Construct all Tissue Subgraphs
-    startTime = time.time()
-    outFile.write('Generating Tissue Subgraphs...\n')
-#    generateAllTissueSubgraphs()
-    elapsedTime = time.time() - startTime
-    h, m, s = hoursMinutesSeconds(elapsedTime)
-    outFile.write('Time Elapsed: %d:%d:%d\n' % (h,m,s))
-    outFile.write('Success: Generated Tissue Subgraphs\n\n')
-    outFile.flush()
-
-    # Analyze Tissue Subgraphs
-    startTime = time.time()
-    outFile.write('Analyzing Tissue Subgraphs...\n')
-#    analyzeAllTissueSubgraphs()
-    elapsedTime = time.time() - startTime
-    h, m, s = hoursMinutesSeconds(elapsedTime)
-    outFile.write('Time Elapsed: %d:%d:%d\n' % (h,m,s))
-    outFile.write('Success: Analyzed Tissue Subgraphs\n\n')
-    outFile.flush()
+    # Analyze Proteome Coverage
+    analyzeProteomeCoverage(outFile)
 
     # Construct Modules for All Tissue Subgraphs
     startTime = time.time()
@@ -383,13 +321,244 @@ def createAndAnalyzeTissueProbeMap(outFile):
 
     return
 
+# createAndAnalyzeGeneTissueMap: Executes all helper functions necessary to
+# generate <tissueGeneMap>, <normTissueGeneMap>, <geneTissueMap>, and 
+# <normGeneTissueMap>. <normGeneTissueMap> is the only DB that deals with
+# presence/absence instead of raw expression values.
+def createAndAnalyzeGeneTissueMap(outFile):
+    
+    dropGeneTissueMapDBs()
+
+    # Generate Tissue:Gene Map
+    # Go from { tissue : { 123_at : 123, 234_at : 234, ...}, ... } to
+    #         { tissue : { 'entrez_gene' : { gene_id : [ 123, 234], }, }, }
+    startTime = time.time()
+    outFile.write('Creating Tissue:Gene Map...\n')
+    outFile.write('\tWarning: Will take ~10 hours. Printing progress...\n')
+    
+    parallelizeTaskByTissue(createTissueGeneMap)
+
+    elapsedTime = time.time() - startTime
+    h, m, s = hoursMinutesSeconds(elapsedTime)
+    outFile.write('\tTime Elapsed: %d:%d:%d\n' % (h,m,s))
+    outFile.write('DONE\n\n')
+    outFile.flush()    
+
+    startTime = time.time()
+    outFile.write('Analyzing Tissue:Gene Map...')
+
+    analyzeTissueGeneMap()
+
+    elapsedTime = time.time() - startTime
+    h, m, s = hoursMinutesSeconds(elapsedTime)
+    outFile.write('DONE\n')    
+    outFile.write('\tTime Elapsed: %d:%d:%d\n' % (h,m,s))
+    
+    outFile.flush()
+
+    # Normalize Tissue:Gene Map
+    # Go from { tissue : { nomenclature : { gene : [1, 2, 3] } } } to
+    #         { tissue : { nomenclature : { gene : 2 } } }
+    startTime = time.time()
+    outFile.write('Normalizing Tissue:Gene Map...')
+
+    parallelizeTaskByTissue(normalizeTissueGeneMap)
+
+    elapsedTime = time.time() - startTime
+    h, m, s = hoursMinutesSeconds(elapsedTime)
+    outFile.write('DONE\n')
+    outFile.write('\tTime Elapsed: %d:%d:%d\n' % (h,m,s))
+
+    outFile.flush()
+
+    # Create Gene:Tissue Map
+    # Go from { tissue : { nomenclature : { gene : 2 } } } to
+    #         { gene : { tissue : 2 } }
+    startTime = time.time()
+    outFile.write('Creating Gene:Tissue Map...')
+
+    record = MongoClient().db.normTissueGeneMap.find_one()
+    numGenes = len(record.get(GENE_TISSUE_MAP_NOMENCLATURE).keys())
+    parallelizeTaskByItem(createGeneTissueMap, numGenes)
+
+    elapsedTime = time.time() - startTime
+    h, m, s = hoursMinutesSeconds(elapsedTime)
+    outFile.write('DONE\n')    
+    outFile.write('\tTime Elapsed: %d:%d:%d\n' % (h,m,s))
+    
+    outFile.flush()
+
+    # Normalize Gene:Tissue Map
+    # Go from { gene : { tissue : 2 } } to
+    #         { gene : id, tissue_list: [ A, B, C ], }
+    startTime = time.time()
+    outFile.write('Normalizing Gene:Tissue Map...')
+
+    normalizeGeneTissueMap()
+
+    elapsedTime = time.time() - startTime
+    h, m, s = hoursMinutesSeconds(elapsedTime)
+    outFile.write('DONE\n')    
+    outFile.write('\tTime Elapsed: %d:%d:%d\n' % (h,m,s))
+    
+    outFile.flush()
+
+
+    # Shuffle Gene:Tissue Map
+    # Randomizes gene expression
+    startTime = time.time()
+    outFile.write('Shuffling Gene:Tissue Map...')
+
+    shuffleGeneTissueMap()
+
+    elapsedTime = time.time() - startTime
+    h, m, s = hoursMinutesSeconds(elapsedTime)
+    outFile.write('DONE\n')    
+    outFile.write('\tTime Elapsed: %d:%d:%d\n' % (h,m,s))
+    
+    outFile.flush()
+
+    return
+
+# createGlobalAndTissueNetworks: Executes helper functions to create
+# global, intersection, and tissue networks.
+def createGlobalAndTissueNetworks(outFile):
+    # Create Global Network
+    startTime = time.time()
+    outFile.write('Creating Global Network...')
+
+    createGlobalNetwork()
+
+    elapsedTime = time.time() - startTime
+    h, m, s = hoursMinutesSeconds(elapsedTime)
+    outFile.write('DONE\n')
+    outFile.write('Time Elapsed: %d:%d:%d\n\n' % (h,m,s))
+    outFile.flush()
+
+    # Create Intersection Network
+    startTime = time.time()
+    outFile.write('Creating Intersection Network...')
+
+    createIntersectionNetwork()
+
+    elapsedTime = time.time() - startTime
+    h, m, s = hoursMinutesSeconds(elapsedTime)
+    outFile.write('DONE\n')
+    outFile.write('Time Elapsed: %d:%d:%d\n\n' % (h,m,s))
+    outFile.flush()
+
+    # Create Tissue Networks
+    startTime = time.time()
+    outFile.write('Creating Tissue Networks...')
+
+    createTissueNetworks()
+
+    elapsedTime = time.time() - startTime
+    h, m, s = hoursMinutesSeconds(elapsedTime)
+    outFile.write('DONE\n')
+    outFile.write('Time Elapsed: %d:%d:%d\n\n' % (h,m,s))
+    outFile.flush()
+
+    return
+
+# shuffleGeneExpressionData: Shuffles expression data in <normGeneTissueMap>
+# and works backward to create <shuffleGeneTissueMap> and 
+# <shuffleNormTissueGeneMap>.
+def shuffleGeneExpressionData(outFile):
+
+    # Shuffle Gene Tissue Map
+    startTime = time.time()
+    outFile.write('Shuffling Gene Tissue Map...')
+
+    shuffleGeneTissueMap()
+
+    elapsedTime = time.time() - startTime
+    h, m, s = hoursMinutesSeconds(elapsedTime)
+    outFile.write('DONE\n')
+    outFile.write('Time Elapsed: %d:%d:%d\n\n' % (h,m,s))
+    outFile.flush()
+
+    # Normalize <shuffleGeneTissueMap>
+    startTime = time.time()
+    outFile.write('Normalizing Shuffled Gene Tissue Map...')
+
+    normalizeGeneTissueMap(shuffle = True)
+
+    elapsedTime = time.time() - startTime
+    h, m, s = hoursMinutesSeconds(elapsedTime)
+    outFile.write('DONE\n')
+    outFile.write('Time Elapsed: %d:%d:%d\n\n' % (h,m,s))
+    outFile.flush()
+
+    # Create Shuffled Normalized Tissue Gene Map
+    startTime = time.time()
+    outFile.write('Shuffling Normalized Tissue Gene Map...')
+
+    shuffleNormTissueGeneMap()
+
+    elapsedTime = time.time() - startTime
+    h, m, s = hoursMinutesSeconds(elapsedTime)
+    outFile.write('DONE\n')
+    outFile.write('Time Elapsed: %d:%d:%d\n\n' % (h,m,s))
+    outFile.flush()
+    
+    return
+
+
+# createShuffledNetworks: Executes helper functions necessary to
+# create tissue network files.
+def createShuffledNetworks(outFile):
+
+    # Create Global Networks
+    startTime = time.time()
+    outFile.write('Creating Shuffled Global Network...')
+
+    createGlobalNetwork(shuffle = True)
+
+    elapsedTime = time.time() - startTime
+    h, m, s = hoursMinutesSeconds(elapsedTime)
+    outFile.write('DONE\n')
+    outFile.write('Time Elapsed: %d:%d:%d\n\n' % (h,m,s))
+    outFile.flush()
+
+    # Create Intersection Network
+    startTime = time.time()
+    outFile.write('Creating Shuffled Intersection Network...')
+
+    createIntersectionNetwork(shuffle = True)
+
+    elapsedTime = time.time() - startTime
+    h, m, s = hoursMinutesSeconds(elapsedTime)
+    outFile.write('DONE\n')
+    outFile.write('Time Elapsed: %d:%d:%d\n\n' % (h,m,s))
+    outFile.flush()
+
+    # Create Tissue Network
+    startTime = time.time()
+    outFile.write('Creating Shuffled Tissue Networks...')
+
+    createTissueNetworks(shuffleVal = True)
+
+    elapsedTime = time.time() - startTime
+    h, m, s = hoursMinutesSeconds(elapsedTime)
+    outFile.write('DONE\n')
+    outFile.write('Time Elapsed: %d:%d:%d\n' % (h,m,s))
+    outFile.flush()
+    
+    return
+
+
 
 # - - - - - - - - - - MAIN SCRIPT - - - - - - - - - - #
 
 
 def main():
-    f = open('testfile4', 'w')
-    createAndAnalyzeGeneTissueMap(f)
+    f = open('testfile7', 'w')
+    createGlobalAndTissueNetworks(f)
+    shuffleGeneExpressionData(f)
+    createShuffledNetworks(f)
+    analyzeProteomeCoverage(f)
     return
 
+main()
 

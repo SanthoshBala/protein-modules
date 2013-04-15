@@ -7,6 +7,7 @@
 
 
 # Library Imports
+from pymongo import *
 from graph_tool.all import *
 
 # Global Imports
@@ -97,12 +98,16 @@ def readGraph(filename, canonical = False, weighted = True, directed = False):
     return graph
 
 # getTissueSubgraph: Reads PPI subgraph from file.
-def getTissueSubgraph(tissue):
+def getTissueSubgraph(tissue, shuffle = False):
     interactionType = DESIRED_INTERACTION_TYPE
 
     # Construct File Path
-    filename = GENEMANIA_TISSUE_BASE_FILENAME % (tissue, interactionType)
-    filepath = PATH_TO_TISSUE_SUBGRAPHS + filename
+    if shuffle:
+        filename = SHUFFLE_TISSUE_SUBGRAPH_BASE_FILENAME % (tissue, interactionType)
+        filepath = PATH_TO_SHUFFLE_TISSUE_SUBGRAPHS + filename
+    else:
+        filename = GENEMANIA_TISSUE_BASE_FILENAME % (tissue, interactionType)
+        filepath = PATH_TO_TISSUE_SUBGRAPHS + filename
 
     # Read Graph to Object
     graph = readGraph(filepath)
@@ -119,6 +124,84 @@ def getUnweightedTissueSubgraph(tissue):
 
     # Read Graph to Object
     graph = readGraph(filepath, weighted = False)
+    return graph
+
+
+# getTissueUnionGraph: Constructs union of all tissue subgraphs.
+def getTissueUnionGraph(shuffle = False):
+    # Open DB Connection
+    cli = MongoClient()
+    db = cli.db
+    if shuffle:
+        tgmDB = db.shuffleNormTissueGeneMap
+    else:
+        tgmDB = db.normTissueGeneMap
+
+    # Open Global Graph File
+    if shuffle:
+        inFilePath = PATH_TO_SHUFFLE_TISSUE_SUBGRAPHS
+        inFileName = SHUFFLE_TISSUE_SUBGRAPH_BASE_FILENAME % 'global'
+    else:
+        inFilePath = PATH_TO_TISSUE_SUBGRAPHS
+        inFileName = GENEMANIA_TISSUE_BASE_FILENAME % ('global', 'ppi')
+    inFile = open(inFilePath + inFileName, 'r')
+
+    # Initialize <graph>
+    graph = Graph(directed=False)
+    # Add vertex property for gene_id
+    graph.vertex_properties['gene_id'] = graph.new_vertex_property('string')
+    graph.edge_properties['confidence'] = graph.new_edge_property('double')
+
+    geneDict = {}
+    geneIDProperty = graph.vertex_properties['gene_id']
+
+    # Get Set of Genes
+    geneSet = set(tgmDB.find_one( { 'tissue' : 'heart'} ).
+                  get('primary_gene_id').keys())
+
+    # Iterate through <inFile>
+    headerLine = True
+    for line in inFile:
+        if headerLine:
+            headerLine = False
+            continue
+
+        lineFields = parseTabSeparatedLine(line)
+        geneAName = lineFields[0]
+        geneBName = lineFields[1]
+        confStr = lineFields[2]
+        confFloat = 1.0 - float(confStr)
+        if confFloat == 0.0:
+            continue
+        
+        if geneAName not in geneSet:
+            continue
+        if geneBName not in geneSet:
+            continue
+
+        # Get geneA's vertex index if it exists
+        if geneAName in geneDict:
+            geneANode = geneDict[geneAName]
+        else:
+            geneANode = graph.add_vertex()
+            geneIDProperty[geneANode] = geneAName
+            geneDict.update( { geneAName : geneANode } )
+             
+        # Get geneB's vertex if it exists
+        if geneBName in geneDict:
+            geneBNode = geneDict[geneBName]
+        else:
+            geneBNode = graph.add_vertex()
+            geneIDProperty[geneBNode] = geneBName
+            geneDict.update( { geneBName : geneBNode } )
+
+        # Create edge between geneANode and geneBNode
+        newEdge = graph.add_edge(geneANode, geneBNode)
+        graph.edge_properties['confidence'][newEdge] = confFloat
+                
+    # Close DB Connection
+    cli.close()
+
     return graph
 
 

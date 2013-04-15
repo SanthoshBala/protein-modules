@@ -7,7 +7,6 @@
 
 
 # Python Imports
-from os import *
 from random import *
 
 # Library Imports
@@ -61,15 +60,19 @@ def createGeneTissueMap(minimum = 0, maximum = 10000):
 
 
 # normalizeGeneTissueMap: Creates <normGeneTissueMap> from <geneTissueMap>.
-def normalizeGeneTissueMap():
+def normalizeGeneTissueMap(shuffle = False):
     # Open DB Connection
     cli = MongoClient()
     db = cli.db
-    ngtmDB = db.normGeneTissueMap
-    geneTissueMap = db.geneTissueMap
+    if shuffle:
+        ngtmDB = db.normShuffleGeneTissueMap
+        gtmDB = db.shuffleGeneTissueMap
+    else:
+        ngtmDB = db.normGeneTissueMap
+        gtmDB = db.geneTissueMap
 
-    # Iterate through <geneTissueMap>
-    for geneRecord in geneTissueMap.find():
+    # Iterate through <gtmDB>
+    for geneRecord in gtmDB.find():
         geneID = geneRecord.get(GENE_TISSUE_MAP_NOMENCLATURE)
         if PRINT_PROGRESS:
             print geneID
@@ -204,17 +207,18 @@ def shuffleGeneTissueMap():
         # Get Probability of Expression
         numTissues = len(normTissueList)
         expressionProb = numTissues/float(len(FUNCTIONAL_TISSUE_LIST))
+
+        record = { 
+            'primary_gene_id' : shuffleGeneID,
+            }
         
         # Randomly Assign Tissues
         for tissue in FUNCTIONAL_TISSUE_LIST:
             sample = random()
             if sample < expressionProb:
-                shuffleTissueList.append(tissue)
-
-        record = { 
-            'gene_id' : shuffleGeneID,
-            'tissue_list' : shuffleTissueList,
-            }
+                record.update( { tissue : ARRAY_EXPRESSION_THRESHOLD + 1 } )
+            else:
+                record.update( { tissue : 0 } )
 
         shuffleGTM.save(record)
 

@@ -1,11 +1,18 @@
 #! /usr/bin/python
 
-# Santhosh Balasubramanian
-# February 27, 2013
+# tissueSpecificity.py
+# Author: Santhosh Balasubramanian
+# Created: February 27, 2013
+# Last Modified: April 14, 2013
 
+# Global Imports
 from settings import *
-from graphUtil import *
-from moduleUtil import *
+
+# Graph Imports
+from graphs.graphUtil import *
+
+# Module Imports
+from modules.moduleUtil import *
 
 IGNORE_INHERITED_DIFF = False
 
