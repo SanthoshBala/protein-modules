@@ -89,3 +89,29 @@ def compareGlobalAndLocalNetworks():
     cli.close()
 
     return
+
+
+# getProteinTissueMultiplicity: Write file containing names of proteins
+# and number of tissues in which each one is found.
+def getProteinTissueMultiplicity():
+    # Open DB Connection
+    cli = MongoClient()
+    db = cli.db
+    ngtmDB = db.normGeneTissueMap
+
+    # Open Output File
+    outFilePath = PATH_TO_TISSUE_SPECIFICITY
+    outFileName = 'protein.tissue.multiplicity'
+    outFile = open(outFilePath + outFileName, 'w')
+
+    # Iterate through DB
+    for proteinRecord in ngtmDB.find():
+        proteinID = proteinRecord.get('gene_id')
+        tissueMultiplicity = len(proteinRecord.get('tissue_list'))
+        outFile.write('%s\t%d\n' % (proteinID, tissueMultiplicity))
+
+    # Close File and DB Connection
+    outFile.close()
+    cli.close()
+
+    return
