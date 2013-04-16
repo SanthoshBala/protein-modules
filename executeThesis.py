@@ -123,8 +123,10 @@ def createModuleDatabase(outFile):
     startTime = time.time()
     outFile.write('Adding Housekeeping Index Field to Module DB...')
     
-    createModuleHousekeepingIndexField()
-    createModuleHousekeepingIndexField(shuffle = True)
+    numRecords = MongoClient().db.modules.count()
+    parallelizeTaskByRecord(createModuleHousekeepingIndexField, numRecords)
+    parallelizeTaskByRecord(createModuleHousekeepingIndexField, numRecords,
+                            shuffleParam = True, shuffleVal = True)
 
     elapsedTime = time.time() - startTime
     h, m, s = hoursMinutesSeconds(elapsedTime)
@@ -135,11 +137,9 @@ def createModuleDatabase(outFile):
     return
 
 
-
-    
-# computeTissueMultiplicity: Computes tissue multiplicity for vertices,
+# analyzeTissueMultiplicity: Computes tissue multiplicity for vertices,
 # edges, and modules.
-def computeTissueMultiplicity(outFile):
+def analyzeTissueMultiplicity(outFile):
     
 
     # Compute Protein Tissue Multiplicity
@@ -202,17 +202,29 @@ def executeThesis():
     # Create/Analyze Gene:Tissue Map
     createAndAnalyzeGeneTissueMap(outFile)
 
-    # Create Global, Intersection, and Tissue Networks
-    createGlobalAndTissueNetworks(outFile)
-
     # Shuffle Gene Expression Data
     shuffleGeneExpression(outFile)
+
+    # Create Global, Intersection, and Tissue Networks
+    createGlobalAndTissueNetworks(outFile)
 
     # Create Shuffled Global, Intersection, and Tissue Networks
     createShuffledNetworks(outFile)
     
+    # Find SPICI Modules For All Networks
+    findRawModulesForAllNetworks(outFile)
+
+    # Create Module Database
+    createModuleDatabase(outFile)
+    createModuleIDFilesForAllNetworks(outFile)
+
     # Analyze Proteome Coverage
     analyzeProteomeCoverage(outFile)
+
+    # Analyze Tissue Multiplicity
+    analyzeTissueMultiplicity(f)
+
+
 
     # Construct Modules for All Tissue Subgraphs
     startTime = time.time()
@@ -685,4 +697,4 @@ def main():
     computeTissueMultiplicity(f)
     return
 
-main()
+#main()
