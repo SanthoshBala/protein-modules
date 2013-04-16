@@ -20,6 +20,9 @@ from common.strings import *
 from graphs.graphIO import *
 from graphs.graphUtil import *
 
+# Nomenclature Imports
+from nomenclature.geneID import *
+
 
 # - - - - - - - - - - MODULE RETRIEVAL - - - - - - - - - - #
 
@@ -102,7 +105,7 @@ def getTissueModularizedGeneSet(tissue):
 
 
 # getModuleGraph: Returns graph for <moduleID>
-def getModuleGraph(moduleID):
+def getModuleGraph(moduleID, symbol = False):
     # Open DB Connection
     cli = MongoClient()
     db = cli.db
@@ -139,15 +142,43 @@ def getModuleGraph(moduleID):
             vertexA = moduleIDVertexMap.get(proteinA)
         else:
             vertexA = moduleGraph.add_vertex()
-            geneIDProp[vertexA] = proteinA
+            if symbol:
+                if 'ENSG' in proteinA:
+                    entrezID = getEntrezForEnsemblGene(proteinA)
+                    if not entrezID:
+                        symbol = proteinA
+                    else:
+                        symbol = getNCBIOfficialSymbol(entrezID)
+                else:
+                    entrezID = proteinA
+                    symbol = getNCBIOfficialSymbol(entrezID)
+                geneIDProp[vertexA] = symbol
+                print proteinA, entrezID, symbol
+            else:
+                geneIDProp[vertexA] = proteinA
             moduleIDVertexMap.update( { proteinA : vertexA } )
             
+
+
         # Get proteinB's vertex if it exists
         if proteinB in moduleIDVertexMap:
             vertexB = moduleIDVertexMap.get(proteinB)
         else:
             vertexB = moduleGraph.add_vertex()
-            geneIDProp[vertexB] = proteinB
+            if symbol:
+                if 'ENSG' in proteinB:
+                    entrezID = getEntrezForEnsemblGene(proteinB)
+                    if not entrezID:
+                        symbol = proteinB
+                    else:
+                        symbol = getNCBIOfficialSymbol(entrezID)
+                else:
+                    entrezID = proteinB
+                    symbol = getNCBIOfficialSymbol(entrezID)
+                geneIDProp[vertexB] = symbol
+                print proteinB, entrezID, symbol
+            else:
+                geneIDProp[vertexB] = proteinB
             moduleIDVertexMap.update( { proteinB : vertexB } )
 
         newEdge = moduleGraph.add_edge(vertexA, vertexB)
