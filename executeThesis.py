@@ -35,40 +35,145 @@ from networks.networkCreation import *
 # Modules Imports
 from modules.moduleUtil import *
 from modules.moduleTopology import *
+from modules.moduleDatabase import *
 
 # Analysis Imports
 from analysis.proteomeCoverage import *
+from analysis.tissueMultiplicity import *
 
-# analyzeProteomeCoverage: Generates files listing percentage of known
-# proteome that is represented in each tissue network.
-def analyzeProteomeCoverage(outFile):
+
+# findRawModulesForAllNetworks
+def findRawModulesForAllNetworks(outFile):
+    # Compute Raw SPICI Module Files
+    startTime = time.time()
+    outFile.write('Computing Raw SPICI Module Files...')
     
-    # Normal Networks
-    startTime = time.time()
-    outFile.write('Analyzing Proteome Coverage...')
-
-    getProteomeCoverage()
+    parallelizeTaskByTissue(createAllRawModuleFiles, augmented = True)
 
     elapsedTime = time.time() - startTime
     h, m, s = hoursMinutesSeconds(elapsedTime)
-    outFile.write('DONE\n\n')
-    outFile.write('Time Elapsed: %d:%d:%d\n\n' % (h,m,s))
+    outFile.write('DONE\n')
+    outFile.write('\tTime Elapsed: %d:%d:%d\n\n' % (h,m,s))
     outFile.flush()
-
-    # Shuffled Networks
+    
+    # Compute Raw SPICI Shuffled Module Files
     startTime = time.time()
-    outFile.write('Analyzing Shuffled Proteome Coverage...')
-
-    getProteomeCoverage(shuffle=True)
+    outFile.write('Computing Shuffle Raw SPICI Module Files...')
+    
+    parallelizeTaskByTissue(createAllRawModuleFiles, augmented = True, 
+                            shuffleParam = True, shuffleVal = True)
 
     elapsedTime = time.time() - startTime
     h, m, s = hoursMinutesSeconds(elapsedTime)
-    outFile.write('DONE\n\n')
-    outFile.write('Time Elapsed: %d:%d:%d\n\n' % (h,m,s))
+    outFile.write('DONE\n')
+    outFile.write('\tTime Elapsed: %d:%d:%d\n\n' % (h,m,s))
     outFile.flush()
 
     return
+
+
+# createModuleDatabase
+def createModuleDatabase(outFile):
     
+    # Drop Module Database
+    dropModuleDBs()
+    
+    # Compute Raw SPICI Shuffled Module Files
+    startTime = time.time()
+    outFile.write('Initializing Module DB...')
+    
+    createModuleDB()
+    createModuleDB(shuffle = True)
+
+    elapsedTime = time.time() - startTime
+    h, m, s = hoursMinutesSeconds(elapsedTime)
+    outFile.write('DONE\n')
+    outFile.write('\tTime Elapsed: %d:%d:%d\n\n' % (h,m,s))
+    outFile.flush()
+    
+    # Add Germ Layer Field to DB
+    startTime = time.time()
+    outFile.write('Adding Germ Layer Field to Module DB...')
+    
+    createModuleGermLayerField()
+    createModuleGermLayerField(shuffle = True)
+
+    elapsedTime = time.time() - startTime
+    h, m, s = hoursMinutesSeconds(elapsedTime)
+    outFile.write('DONE\n')
+    outFile.write('\tTime Elapsed: %d:%d:%d\n\n' % (h,m,s))
+    outFile.flush()
+
+    # Add Protein Universality Field to Module DB
+    startTime = time.time()
+    outFile.write('Adding Protein Universality Field to Module DB...')
+    
+    numRecords = MongoClient().db.modules.count()
+    parallelizeTaskByRecord(createModuleProteinUniversalityField, numRecords)
+    parallelizeTaskByRecord(createModuleProteinUniversalityField, numRecords,
+                            shuffleParam = True, shuffleVal = True)
+
+    elapsedTime = time.time() - startTime
+    h, m, s = hoursMinutesSeconds(elapsedTime)
+    outFile.write('DONE\n')
+    outFile.write('\tTime Elapsed: %d:%d:%d\n\n' % (h,m,s))
+    outFile.flush()
+
+    # Add Housekeeping Index Field to Module DB
+    startTime = time.time()
+    outFile.write('Adding Housekeeping Index Field to Module DB...')
+    
+    createModuleHousekeepingIndexField()
+    createModuleHousekeepingIndexField(shuffle = True)
+
+    elapsedTime = time.time() - startTime
+    h, m, s = hoursMinutesSeconds(elapsedTime)
+    outFile.write('DONE\n')
+    outFile.write('\tTime Elapsed: %d:%d:%d\n\n' % (h,m,s))
+    outFile.flush()
+    
+    return
+
+
+
+    
+# computeTissueMultiplicity: Computes tissue multiplicity for vertices,
+# edges, and modules.
+def computeTissueMultiplicity(outFile):
+    
+
+    # Compute Protein Tissue Multiplicity
+    startTime = time.time()
+    outFile.write('Computing Protein Tissue Multiplicity...')
+    
+    getProteinTissueMultiplicity()
+
+    elapsedTime = time.time() - startTime
+    h, m, s = hoursMinutesSeconds(elapsedTime)
+    outFile.write('DONE\n')
+    outFile.write('\tTime Elapsed: %d:%d:%d\n\n' % (h,m,s))
+    outFile.flush()
+
+    return
+
+# createModuleIDFIlesForAllNetworks
+def createModuleIDFilesForAllNetworks(outFile):
+
+    # Create All Module ID Files
+    startTime = time.time()
+    outFile.write('Creating All Module ID Files...')
+    
+    createAllModuleIDFiles()
+    createAllModuleIDFiles(shuffle = True)
+
+    elapsedTime = time.time() - startTime
+    h, m, s = hoursMinutesSeconds(elapsedTime)
+    outFile.write('DONE\n')
+    outFile.write('\tTime Elapsed: %d:%d:%d\n\n' % (h,m,s))
+    outFile.flush()
+    
+    return
+
 
 # executeThesis: Executes all helper functions necessary to create databases 
 # and data files for tissue-specific analysis of PPI networks.
@@ -115,8 +220,7 @@ def executeThesis():
 #    findModulesForAllTissues()
     elapsedTime = time.time() - startTime
     h, m, s = hoursMinutesSeconds(elapsedTime)
-    outFile.write('Time Elapsed: %d:%d:%d\n' % (h,m,s))
-    outFile.write('Success: Found Modules\n\n')
+    outFile.write('\tTime Elapsed: %d:%d:%d\n' % (h,m,s))
     outFile.flush()
 
     # Construct Module Topology for All Tissue Subgraphs
@@ -125,8 +229,7 @@ def executeThesis():
 #    constructAllModuleTopologies(outFile)
     elapsedTime = time.time() - startTime
     h, m, s = hoursMinutesSeconds(elapsedTime)
-    outFile.write('Time Elapsed: %d:%d:%d\n' % (h,m,s))
-    outFile.write('Success: Generated Tissue Subgraphs\n\n')
+    outFile.write('\tTime Elapsed: %d:%d:%d\n' % (h,m,s))
     outFile.flush()
 
     
@@ -300,7 +403,7 @@ def createAndAnalyzeTissueProbeMap(outFile):
 
     elapsedTime = time.time() - startTime
     h, m, s = hoursMinutesSeconds(elapsedTime)
-    outFile.write('Time Elapsed: %d:%d:%d\n' % (h,m,s))
+    outFile.write('\tTime Elapsed: %d:%d:%d\n' % (h,m,s))
     outFile.write('Success: Analyzed Tissue:Probe Map\n\n')
     outFile.flush()
 
@@ -315,7 +418,7 @@ def createAndAnalyzeTissueProbeMap(outFile):
 
     elapsedTime = time.time() - startTime
     h, m, s = hoursMinutesSeconds(elapsedTime)
-    outFile.write('Time Elapsed: %d:%d:%d\n' % (h,m,s))
+    outFile.write('\tTime Elapsed: %d:%d:%d\n' % (h,m,s))
     outFile.write('Success: Normalized Tissue:Probe Map\n\n')
     outFile.flush()
 
@@ -403,21 +506,6 @@ def createAndAnalyzeGeneTissueMap(outFile):
     
     outFile.flush()
 
-
-    # Shuffle Gene:Tissue Map
-    # Randomizes gene expression
-    startTime = time.time()
-    outFile.write('Shuffling Gene:Tissue Map...')
-
-    shuffleGeneTissueMap()
-
-    elapsedTime = time.time() - startTime
-    h, m, s = hoursMinutesSeconds(elapsedTime)
-    outFile.write('DONE\n')    
-    outFile.write('\tTime Elapsed: %d:%d:%d\n' % (h,m,s))
-    
-    outFile.flush()
-
     return
 
 # createGlobalAndTissueNetworks: Executes helper functions to create
@@ -432,7 +520,7 @@ def createGlobalAndTissueNetworks(outFile):
     elapsedTime = time.time() - startTime
     h, m, s = hoursMinutesSeconds(elapsedTime)
     outFile.write('DONE\n')
-    outFile.write('Time Elapsed: %d:%d:%d\n\n' % (h,m,s))
+    outFile.write('\tTime Elapsed: %d:%d:%d\n\n' % (h,m,s))
     outFile.flush()
 
     # Create Intersection Network
@@ -444,7 +532,7 @@ def createGlobalAndTissueNetworks(outFile):
     elapsedTime = time.time() - startTime
     h, m, s = hoursMinutesSeconds(elapsedTime)
     outFile.write('DONE\n')
-    outFile.write('Time Elapsed: %d:%d:%d\n\n' % (h,m,s))
+    outFile.write('\tTime Elapsed: %d:%d:%d\n\n' % (h,m,s))
     outFile.flush()
 
     # Create Tissue Networks
@@ -456,7 +544,7 @@ def createGlobalAndTissueNetworks(outFile):
     elapsedTime = time.time() - startTime
     h, m, s = hoursMinutesSeconds(elapsedTime)
     outFile.write('DONE\n')
-    outFile.write('Time Elapsed: %d:%d:%d\n\n' % (h,m,s))
+    outFile.write('\tTime Elapsed: %d:%d:%d\n\n' % (h,m,s))
     outFile.flush()
 
     return
@@ -465,6 +553,9 @@ def createGlobalAndTissueNetworks(outFile):
 # and works backward to create <shuffleGeneTissueMap> and 
 # <shuffleNormTissueGeneMap>.
 def shuffleGeneExpressionData(outFile):
+
+    # Drop Shuffled Expression Databases
+    dropShuffleExpressionDBs()
 
     # Shuffle Gene Tissue Map
     startTime = time.time()
@@ -475,7 +566,7 @@ def shuffleGeneExpressionData(outFile):
     elapsedTime = time.time() - startTime
     h, m, s = hoursMinutesSeconds(elapsedTime)
     outFile.write('DONE\n')
-    outFile.write('Time Elapsed: %d:%d:%d\n\n' % (h,m,s))
+    outFile.write('\tTime Elapsed: %d:%d:%d\n\n' % (h,m,s))
     outFile.flush()
 
     # Normalize <shuffleGeneTissueMap>
@@ -487,7 +578,7 @@ def shuffleGeneExpressionData(outFile):
     elapsedTime = time.time() - startTime
     h, m, s = hoursMinutesSeconds(elapsedTime)
     outFile.write('DONE\n')
-    outFile.write('Time Elapsed: %d:%d:%d\n\n' % (h,m,s))
+    outFile.write('\tTime Elapsed: %d:%d:%d\n\n' % (h,m,s))
     outFile.flush()
 
     # Create Shuffled Normalized Tissue Gene Map
@@ -499,7 +590,7 @@ def shuffleGeneExpressionData(outFile):
     elapsedTime = time.time() - startTime
     h, m, s = hoursMinutesSeconds(elapsedTime)
     outFile.write('DONE\n')
-    outFile.write('Time Elapsed: %d:%d:%d\n\n' % (h,m,s))
+    outFile.write('\tTime Elapsed: %d:%d:%d\n\n' % (h,m,s))
     outFile.flush()
     
     return
@@ -518,7 +609,7 @@ def createShuffledNetworks(outFile):
     elapsedTime = time.time() - startTime
     h, m, s = hoursMinutesSeconds(elapsedTime)
     outFile.write('DONE\n')
-    outFile.write('Time Elapsed: %d:%d:%d\n\n' % (h,m,s))
+    outFile.write('\tTime Elapsed: %d:%d:%d\n\n' % (h,m,s))
     outFile.flush()
 
     # Create Intersection Network
@@ -530,35 +621,68 @@ def createShuffledNetworks(outFile):
     elapsedTime = time.time() - startTime
     h, m, s = hoursMinutesSeconds(elapsedTime)
     outFile.write('DONE\n')
-    outFile.write('Time Elapsed: %d:%d:%d\n\n' % (h,m,s))
+    outFile.write('\tTime Elapsed: %d:%d:%d\n\n' % (h,m,s))
     outFile.flush()
 
     # Create Tissue Network
     startTime = time.time()
     outFile.write('Creating Shuffled Tissue Networks...')
 
-    createTissueNetworks(shuffleVal = True)
+    createTissueNetworks(shuffle = True)
 
     elapsedTime = time.time() - startTime
     h, m, s = hoursMinutesSeconds(elapsedTime)
     outFile.write('DONE\n')
-    outFile.write('Time Elapsed: %d:%d:%d\n' % (h,m,s))
+    outFile.write('\tTime Elapsed: %d:%d:%d\n' % (h,m,s))
     outFile.flush()
     
     return
 
+# analyzeProteomeCoverage: Generates files listing percentage of known
+# proteome that is represented in each tissue network.
+def analyzeProteomeCoverage(outFile):
+    
+    # Normal Networks
+    startTime = time.time()
+    outFile.write('Analyzing Proteome Coverage...')
+
+    getProteomeCoverage()
+    getProteomeCoverage(shuffle=True)
+
+    elapsedTime = time.time() - startTime
+    h, m, s = hoursMinutesSeconds(elapsedTime)
+    outFile.write('DONE\n\n')
+    outFile.write('\tTime Elapsed: %d:%d:%d\n\n' % (h,m,s))
+    outFile.flush()
+
+    # Compare Global and Local Networks
+    startTime = time.time()
+    outFile.write('Comparing Global and Local Networks...')
+    
+    compareGlobalAndLocalNetworks()
+
+    elapsedTime = time.time() - startTime
+    h, m, s = hoursMinutesSeconds(elapsedTime)
+    outFile.write('DONE\n')
+    outFile.write('\tTime Elapsed: %d:%d:%d\n\n' % (h,m,s))
+    outFile.flush()
+
+    return
 
 
 # - - - - - - - - - - MAIN SCRIPT - - - - - - - - - - #
 
 
 def main():
-    f = open('testfile7', 'w')
-    createGlobalAndTissueNetworks(f)
+    f = open('testfile9', 'w')
     shuffleGeneExpressionData(f)
+    createGlobalAndTissueNetworks(f)
     createShuffledNetworks(f)
+    findRawModulesForAllNetworks(f)
+    createModuleDatabase(f)
+    createModuleIDFilesForAllNetworks(f)
     analyzeProteomeCoverage(f)
+    computeTissueMultiplicity(f)
     return
 
 main()
-

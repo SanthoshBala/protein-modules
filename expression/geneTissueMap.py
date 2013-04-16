@@ -65,7 +65,7 @@ def normalizeGeneTissueMap(shuffle = False):
     cli = MongoClient()
     db = cli.db
     if shuffle:
-        ngtmDB = db.normShuffleGeneTissueMap
+        ngtmDB = db.shuffleNormGeneTissueMap
         gtmDB = db.shuffleGeneTissueMap
     else:
         ngtmDB = db.normGeneTissueMap

@@ -118,6 +118,37 @@ def dropGeneTissueMapDBs():
     return
 
 
+# dropShuffleExpressionDBs: Drops <shuffleGeneTissueMap>,
+# <shuffleNormGeneTissueMap>, and <shuffleNormTissueGeneMap>
+def dropShuffleExpressionDBs():
+    # Open DB Connection
+    cli = MongoClient()
+    db = cli.db
+
+    # Drop Shuffle DBs
+    db.shuffleGeneTissueMap.drop()
+    db.shuffleNormGeneTissueMap.drop()
+    db.shuffleNormTissueGeneMap.drop()
+
+    # Close DB Connection
+    cli.close()
+    
+    return
+    
+# dropModuleDBs: Drops <modules>.
+def dropModuleDBs():
+    # Open DB Connection
+    cli = MongoClient()
+    db = cli.db
+
+    # Drop Module DBs
+    db.modules.drop()
+
+    # Close DB Connection
+    cli.close()
+    
+    return
+    
 # dropAllDBs: Drop all known MongoDB databases.
 def dropAllDBs():
 
@@ -126,6 +157,18 @@ def dropAllDBs():
 
     # Drop Microarray DBs
     dropMicroarrayDBs()
+
+    # Drop Probe:Gene Map DBs
+    dropProbeGeneMapDBs()
+
+    # Drop Tissue:Probe Map DBs
+    dropTissueProbeMapDBs()
+
+    # Drop Gene:Tissue Map DBS
+    dropGeneTissueMapDBs()
+
+    # Drop Shuffle Expression DBs
+    dropShuffleExpressionDBs()
 
     return
 

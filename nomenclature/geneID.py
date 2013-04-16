@@ -9,10 +9,12 @@
 # Python Imports
 import json
 import math
+from urllib2 import urlopen
 from multiprocessing import *
 
 # Library Imports
 from pymongo import *
+from bs4 import BeautifulSoup
 
 # Global Imports
 from settings import *
@@ -140,6 +142,12 @@ ENTREZ_ID_MAP_FIELDS = [
 # - - - - - - - - - - GLOBAL ID MAP CREATION - - - - - - - - - - #
 
 
+# getNCBIOfficialSymbol: Gets official symbol for <entrezID>
+def getNCBIOfficialSymbol(entrezID):
+    BASE_NCBI_URL = 'http://www.ncbi.nlm.nih.gov/gene/6634'
+    
+    return
+    
 # createGeneIDMap: Creates database <geneIDMap> which maps between various
 # gene nomenclatures, including Ensembl, Entrez, and RefSeq.
 def createGeneIDMap():

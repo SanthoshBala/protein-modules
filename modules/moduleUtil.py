@@ -101,6 +101,64 @@ def getTissueModularizedGeneSet(tissue):
     return geneSet
 
 
+# getModuleGraph: Returns graph for <moduleID>
+def getModuleGraph(moduleID):
+    # Open DB Connection
+    cli = MongoClient()
+    db = cli.db
+    modDB = db.modules
+
+    # Get Module Record
+    moduleRecord = modDB.find_one( { 'module_id' : moduleID } )
+    geneList = moduleRecord.get('gene_list')
+
+    # Get Tissue Graph
+    tissue = moduleRecord.get('tissue_list')[0]
+    tissueGraph = getTissueSubgraph(tissue)
+    tissueInteractionSet = getInteractionSet(tissueGraph)
+
+    # Construct Module Graph
+    moduleGraph = Graph(directed = False)
+    moduleGraph.vertex_properties['gene_id'] = \
+        moduleGraph.new_vertex_property('string')
+    geneIDProp = moduleGraph.vertex_properties['gene_id']
+    moduleIDVertexMap = {}
+
+    # Iterate through Interactions
+    for interaction in tissueInteractionSet:
+        proteinA = interaction[0]
+        proteinB = interaction[1]
+
+        if proteinA not in geneList:
+            continue
+        if proteinB not in geneList:
+            continue
+
+        # Get proteinA's vertex if it exists
+        if proteinA in moduleIDVertexMap:
+            vertexA = moduleIDVertexMap.get(proteinA)
+        else:
+            vertexA = moduleGraph.add_vertex()
+            geneIDProp[vertexA] = proteinA
+            moduleIDVertexMap.update( { proteinA : vertexA } )
+            
+        # Get proteinB's vertex if it exists
+        if proteinB in moduleIDVertexMap:
+            vertexB = moduleIDVertexMap.get(proteinB)
+        else:
+            vertexB = moduleGraph.add_vertex()
+            geneIDProp[vertexB] = proteinB
+            moduleIDVertexMap.update( { proteinB : vertexB } )
+
+        newEdge = moduleGraph.add_edge(vertexA, vertexB)
+
+    # Close DB Connection
+    cli.close()
+        
+    # Return Graph Object
+    return moduleGraph
+
+
 # - - - - - - - - - - MODULE PROPERTIES - - - - - - - - - - #
 
 

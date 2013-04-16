@@ -25,7 +25,8 @@ NUM_CPU_CORES = 4
 
 # parallelizeTaskByRecord: Paralellizes <functionHandle> amongst
 # 2*<NUM_CPU_CORES> processes by splitting along DB record.
-def parallelizeTaskByRecord(functionHandle, numRecords):
+def parallelizeTaskByRecord(functionHandle, numRecords, shuffleParam = False,
+                            shuffleVal = False):
     # Determine # Processes and Records Per Process
     numProcesses = 2*NUM_CPU_CORES
     recordsPerProcess = int(math.ceil(numRecords/float(numProcesses)))
@@ -33,10 +34,17 @@ def parallelizeTaskByRecord(functionHandle, numRecords):
 
     # Create Processes
     for i in range(numProcesses):
-        processList.append( Process( target = functionHandle, 
-                                     args = ( i*recordsPerProcess,
-                                              recordsPerProcess ) ) )
-
+        if shuffleParam:
+            shuffleDict = { 'shuffle' : shuffleVal }
+            processList.append( Process( target = functionHandle, 
+                                         args = ( i*recordsPerProcess,
+                                                  recordsPerProcess ),
+                                         kwargs = shuffleDict ) ) 
+        else:
+            processList.append( Process( target = functionHandle, 
+                                         args = ( i*recordsPerProcess,
+                                                  recordsPerProcess ) ) )
+    
     # Start Processes
     for i in range(numProcesses):
         processList[i].start()
@@ -49,7 +57,8 @@ def parallelizeTaskByRecord(functionHandle, numRecords):
 
 # parallelizeTaskByItem: Parallelizes <functionHandle> by
 # dividing a parameter amongst N buckets and setting as arguments.
-def parallelizeTaskByItem(functionHandle, numItems):
+def parallelizeTaskByItem(functionHandle, numItems, shuffleParam = False,
+                          shuffleVal = False):
     # Determine # Processes and # Tissues Per Process
     numProcesses = 2*NUM_CPU_CORES
     itemsPerProcess = int(math.ceil(numItems/float(numProcesses)))
@@ -57,10 +66,17 @@ def parallelizeTaskByItem(functionHandle, numItems):
     # Create Processes
     processList = []
     for i in range(numProcesses):
-        processList.append( Process(target=functionHandle, 
-                                    args = (i*itemsPerProcess, 
-                                            (i+1)*itemsPerProcess)) )
-
+        if shuffleParam:
+            shuffleDict = { 'shuffle' : shuffleVal }
+            processList.append( Process(target=functionHandle, 
+                                        args = (i*itemsPerProcess, 
+                                                (i+1)*itemsPerProcess),
+                                        kwargs = shuffleDict) )
+        else:
+            processList.append( Process(target=functionHandle, 
+                                        args = (i*itemsPerProcess, 
+                                                (i+1)*itemsPerProcess)) )
+            
     # Start Processes
     for i in range(numProcesses):
         processList[i].start()
@@ -74,14 +90,17 @@ def parallelizeTaskByItem(functionHandle, numItems):
 
 # parallelizeTaskByTissue: Paralellizes <functionHandle> amongst 
 # 2*<NUM_CPU_CORES> processes. Joins processes before returning.
-def parallelizeTaskByTissue(functionHandle, augmented = False):
+def parallelizeTaskByTissue(functionHandle, augmented = False, 
+                            shuffleParam = False, shuffleVal = False):
 
     if augmented:
         numItems = len(AUGMENTED_TISSUE_LIST)
     else:
         numItems = len(FUNCTIONAL_TISSUE_LIST)
 
-    parallelizeTaskByItem(functionHandle, numItems)
+    parallelizeTaskByItem(functionHandle, numItems, 
+                          shuffleParam = shuffleParam, 
+                          shuffleVal = shuffleVal )
 
     return
 

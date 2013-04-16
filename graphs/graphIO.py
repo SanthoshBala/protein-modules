@@ -218,7 +218,8 @@ def writeGraph(graph, outFilePath, canonical = False, weighted = True):
     geneIDProp = graph.vertex_properties['gene_id']
     confidenceProp = graph.edge_properties['confidence']
 
-    outFile.write('Gene_A\tGene_B\tWeight\n')
+    if not canonical:
+        outFile.write('Gene_A\tGene_B\tWeight\n')
 
     # Iterate Over All Edges in Graph
     for edge in graph.edges():

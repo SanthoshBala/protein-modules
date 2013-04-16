@@ -56,7 +56,7 @@ def createIntersectionNetwork(shuffle = False):
     cli = MongoClient()
     db = cli.db
     if shuffle:
-        gtmDB = db.shuffleGeneTissueMap
+        gtmDB = db.shuffleNormGeneTissueMap
     else:
         gtmDB = db.normGeneTissueMap
 
@@ -76,6 +76,15 @@ def createIntersectionNetwork(shuffle = False):
 
     headerLine = True
     
+    # Get Housekeeping Proteins
+    numTissues = len(FUNCTIONAL_TISSUE_LIST)
+    housekeepingSet = set()
+    housekeepingRecords = gtmDB.find( { 'tissue_list' : 
+                                        { '$size' : numTissues } }, 
+                                      { 'module_id' : 1 } )
+    for record in housekeepingRecords:
+        housekeepingSet.add(record.get('module_id'))
+
     # Iterate through <inFile>
     for line in inFile:
         if headerLine:
@@ -90,18 +99,9 @@ def createIntersectionNetwork(shuffle = False):
         confidence = lineTabFields[2]
         
         # If 1 of genes not in all tissues, continue
-        recordA = gtmDB.find_one( { 'gene_id' : geneA } )
-        if not recordA:
+        if geneA not in housekeepingSet:
             continue
-        recordB = gtmDB.find_one( { 'gene_id' : geneB } )
-        if not recordB:
-            continue
-
-        tissuesA = recordA.get('tissue_list')
-        if len(tissuesA) < numTissues:
-            continue
-        tissuesB = recordB.get('tissue_list')
-        if len(tissuesB) < numTissues:
+        if geneB not in housekeepingSet:
             continue
 
         outFile.write(line)     
@@ -116,10 +116,10 @@ def createIntersectionNetwork(shuffle = False):
 # createTissueNetworks: Creates all tissue subgraphs from global graph,
 # including copying the global graph to new location and creating intersection
 # graph, composed of proteins that are in all tissue-specific networks.
-def createTissueNetworks(minimum = 0, maximum = 80, shuffleVal = False):
+def createTissueNetworks(minimum = 0, maximum = 80, shuffle = False):
     # Create Tissue Subgraphs
     for tissue in FUNCTIONAL_TISSUE_LIST[minimum:maximum]:
-        createTissueNetwork(tissue, shuffle = shuffleVal)    
+        createTissueNetwork(tissue, shuffle = shuffle)    
         if PRINT_PROGRESS:
             print tissue
     
@@ -142,7 +142,7 @@ def createTissueNetwork(tissue, shuffle = False):
     # Open Output File
     if shuffle:
         outFilePath = PATH_TO_SHUFFLE_TISSUE_SUBGRAPHS
-        outFileName = SHUFFLE_TISSUE_SUBGRAPH_BASE_FILENAME % (tissue, 'ppi')
+        outFileName = SHUFFLE_TISSUE_SUBGRAPH_BASE_FILENAME % (tissue)
     else:
         outFilePath = PATH_TO_TISSUE_SUBGRAPHS
         outFileName = GENEMANIA_TISSUE_BASE_FILENAME % (tissue, 'ppi')

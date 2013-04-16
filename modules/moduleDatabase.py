@@ -37,12 +37,12 @@ PATH_TO_SHUFFLE_MODULE_IDS = PATH_TO_MODULES + 'shuffle_module_ids/'
 # raw output of SPICi. These are later converted to files of just module_ids.
 
 # createAllRawModuleFiles: Creates raw module files for all tissues.
-def createAllRawModuleFiles(shuffleVal = False):
+def createAllRawModuleFiles(minimum = 0, maximum = 85, shuffle = False):
     # Iterate through Tissues
-    for tissue in AUGMENTED_TISSUE_LIST:
+    for tissue in AUGMENTED_TISSUE_LIST[minimum:maximum]:
         if PRINT_PROGRESS:
             print tissue
-        createTissueRawModuleFile(tissue, shuffle = shuffleVal)
+        createTissueRawModuleFile(tissue, shuffle = shuffle)
 
     return
 
@@ -53,7 +53,7 @@ def createTissueRawModuleFile(tissue, shuffle = False):
         inFilePath = PATH_TO_SHUFFLE_TISSUE_SUBGRAPHS
         inFileName = SHUFFLE_TISSUE_SUBGRAPH_BASE_FILENAME % tissue
     else:
-        inFilePath = PATH_TO_GENEMANIA_TISSUE_SUBGRAPHS
+        inFilePath = PATH_TO_TISSUE_SUBGRAPHS
         inFileName = GENEMANIA_TISSUE_BASE_FILENAME % (tissue, 'ppi')
 
     # Convert Genemania to SPICi Format
@@ -76,7 +76,7 @@ def createTissueRawModuleFile(tissue, shuffle = False):
 
     # Remove canonical input file
     os.chdir(inFilePath)
-    os.remove(canonFilename)
+    os.remove(canonFileName)
 
     return
 
@@ -174,7 +174,7 @@ def createModuleGermLayerField(shuffle = False):
         modDB = db.shuffleModules
 
     # Iterate through DB
-    for moduleRecord in modDB.find(snapshot = True):
+    for moduleRecord in modDB.find(snapshot = True, timeout = False):
         # Get Germ Layers for <moduleRecord> Tissues
         tissueList = moduleRecord.get('tissue_list')
         germLayerSet = set()
@@ -194,27 +194,29 @@ def createModuleGermLayerField(shuffle = False):
     return
 
 
-# createModuleGeneUniversalityField: Adds 'gene_universality' to modDB. 
-# 'gene_universality' is float representing % of tissues holding genes.
-def createModuleGeneUniversalityField(shuffle = False):
+# createModuleProteinUniversalityField: Adds 'protein_universality' to modDB. 
+# 'protein_universality' is float representing % of tissues holding genes.
+def createModuleProteinUniversalityField(skipVal = 0, limitVal = 0, 
+                                         shuffle = False):
     # Open DB Connection
     cli = MongoClient()
     db = cli.db
     if shuffle:
         modDB = db.shuffleModules
-        gtmDB = db.shuffleGeneTissueMap
+        gtmDB = db.shuffleNormGeneTissueMap
     else:
         modDB = db.modules
         gtmDB = db.normGeneTissueMap
 
     # Iterate through DB
-    for moduleRecord in modDB.find(snapshot = True):
-        moduleID = module.get('module_id')
+    for moduleRecord in modDB.find(skip = skipVal, limit = limitVal, 
+                                   snapshot = True, timeout = False):
+        moduleID = moduleRecord.get('module_id')
         
         if PRINT_PROGRESS:
             print moduleID
 
-        geneList = module.get('gene_list')
+        geneList = moduleRecord.get('gene_list')
         numGenes = len(geneList)
 
         # Get Mean # of Tissues
@@ -226,10 +228,10 @@ def createModuleGeneUniversalityField(shuffle = False):
             numTissues = len(geneRecord.get('tissue_list'))
             tissueSum = tissueSum + numTissues
         tissuesPerGene = tissueSum/float(numGenes)
-        geneUniversality = tissuesPerGene/float(len(FUNCTIONAL_TISSUE_LIST))
+        proteinUniversality = tissuesPerGene/float(len(FUNCTIONAL_TISSUE_LIST))
         
         # Update <modDB>
-        moduleRecord.update( { 'gene_universality' : geneUniversality } )
+        moduleRecord.update( { 'protein_universality' : proteinUniversality } )
         modDB.save(moduleRecord)
 
     # Close DB Connection
@@ -252,12 +254,12 @@ def createModuleHousekeepingIndexField(shuffle = False):
         gtmDB = db.normGeneTissueMap
 
     # Iterate through DB
-    for moduleRecord in modDB.find(snapshot = True):
-        moduleID = module.get('module_id')
+    for moduleRecord in modDB.find(snapshot = True, timeout = False):
+        moduleID = moduleRecord.get('module_id')
         if PRINT_PROGRESS:
             print moduleID
 
-        geneList = module.get('gene_list')
+        geneList = moduleRecord.get('gene_list')
         numGenes = len(geneList)
         numHousekeeping = 0
 

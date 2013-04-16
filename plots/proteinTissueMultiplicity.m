@@ -13,7 +13,7 @@ A = importdata(strcat(PATH_TO_TISSUE_SPECIFICITY, ...
 handle = figure('position', [100 0 1100 1100], 'paperpositionmode', 'auto', ...
             'color', 'none', 'InvertHardCopy', 'off');
         
-hist(A.data, 79);
+hist(A.data, 79, 'BarWidth', 1.0);
 
 % Change Color
 h = findobj(gca, 'Type', 'patch');
@@ -23,7 +23,7 @@ set(h, 'FaceColor', [0.2, 0.2, 1.0], 'EdgeColor', [1.0, 1.0, 1.0]);
 title('Human Proteome Tissue Multiplicity', 'fontname', 'Palatino', 'fontsize', 20);
 
 % X Axis
-xlabel('Number of Tissues', 'fontname', 'Palatino', 'fontsize', 20);
+xlabel('Tissue Multiplicity', 'fontname', 'Palatino', 'fontsize', 20);
 
 % Y Axis
 ylabel('Number of Proteins', 'fontname', 'Palatino', 'fontsize', 20);
