@@ -41,8 +41,13 @@ def writeMatrixToFile(matrix, outFile):
     # Iterate through Rows
     for row in matrix:
         # Iterate through Columns
-        for column in row:
-            outFile.write('\t%s' % str(column))
+        numColumns = len(row)
+        for i in range(numColumns):
+            column = row[i]
+            if i == 0:
+                outFile.write('%s' % str(column))
+            else:
+                outFile.write('\t%s' % str(column))
         outFile.write('\n')
     outFile.write('\n')
     
