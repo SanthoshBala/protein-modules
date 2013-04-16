@@ -112,3 +112,9 @@ def hoursMinutesSeconds(seconds):
 
     return h, m, s
 
+# hashNumberToHistogramBucket: Hashes a <value> to histogram with <numBuckets>
+# buckets, and returns the bucket number.
+def hashNumberToHistogramBucket(value, numBuckets):
+    value = int(math.floor(value/float(numBuckets)))
+
+    return value
