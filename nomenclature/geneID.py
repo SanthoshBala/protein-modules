@@ -139,15 +139,47 @@ ENTREZ_ID_MAP_FIELDS = [
 ]
 
 
-# - - - - - - - - - - GLOBAL ID MAP CREATION - - - - - - - - - - #
+# - - - - - - - - - - NOMENCLATURE QUERY - - - - - - - - - - #
 
 
 # getNCBIOfficialSymbol: Gets official symbol for <entrezID>
 def getNCBIOfficialSymbol(entrezID):
-    BASE_NCBI_URL = 'http://www.ncbi.nlm.nih.gov/gene/6634'
+    BASE_NCBI_URL = 'http://www.ncbi.nlm.nih.gov/gene/%s'
+
+    url = BASE_NCBI_URL % str(entrezID)
     
-    return
+    result = urlopen(url).read()
+    soup = BeautifulSoup(result)
+
+    nameField = soup.find('dd', { 'class' : 'noline' } )
+
+    symbol = str(nameField).split('<')[1].split('>')[1]
+
+    return symbol
+
+# getEntrezForEnsemblGene
+def getEntrezForEnsemblGene(ensemblID):
+    # Open DB Connection
+    cli = MongoClient()
+    db = cli.db
+    gim = db.geneIDMap
     
+    geneRecord = gim.find_one( { 'ensembl_gene_id' : ensemblID } )
+    if geneRecord:
+        entrezID = geneRecord.get( 'entrez_gene_id' )[0]
+    else:
+        return None
+
+
+    # Close DB Connection
+    cli.close()
+
+    return entrezID
+
+
+# - - - - - - - - - - GLOBAL ID MAP CREATION - - - - - - - - - - #
+
+
 # createGeneIDMap: Creates database <geneIDMap> which maps between various
 # gene nomenclatures, including Ensembl, Entrez, and RefSeq.
 def createGeneIDMap():
