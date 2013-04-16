@@ -28,10 +28,10 @@ MODULE_DRAWING_BASE_FILENAME = '%s-graph.pdf'
 
 
 # drawModule: Draws <moduleID> graph to pdf.
-def drawModule(moduleID):
+def drawModule(moduleID, symbol = False):
 
     # Get Module Graph
-    moduleGraph = getModuleGraph(moduleID)
+    moduleGraph = getModuleGraph(moduleID, symbol = symbol)
     
     outFileName = MODULE_DRAWING_BASE_FILENAME % moduleID
     outFile = PATH_TO_REPORT_IMAGES + outFileName
@@ -42,8 +42,32 @@ def drawModule(moduleID):
     geneIDProp = moduleGraph.vertex_properties['gene_id']
 
     # Draw Module
-    graph_tool.draw.graph_draw(moduleGraph, 
-                               output = outFile, vertex_text = geneIDProp)
+    if symbol:
+        sepVal = 0.25
+        penWidth = 3.0
+        graph_tool.draw.graphviz_draw(moduleGraph, 
+                                      overlap = False, 
+#                                      sep = sepVal,
+                                      vsize = 0.75,
+                                      vcolor = '#993399',
+                                      ecolor = '#999999',
+                                      vprops = { 'label' : geneIDProp,
+                                                 'fontsize' : 12,
+                                                 'fontcolor' : '#ffffff',
+                                                 'fontname' : 'Palatino',
+                                                 'penwidth' : penWidth,
+                                                 'fixedsize' : True }, 
+                                      output = outFile)
+    else:
+        graph_tool.draw.graphviz_draw(moduleGraph, 
+                                      overlap = False, 
+                                      vcolor = '#993399',
+                                      ecolor = '#999999',
+                                      vprops = { 'label' : geneIDProp,
+                                                 'fontcolor' : '#ffffff',
+                                                 'fontname' : 'Palatino',
+                                                 'penwidth' : 1.0}, 
+                                      output = outFile)
 
     return
 
