@@ -222,7 +222,7 @@ def createModuleProteinUniversalityField(skipVal = 0, limitVal = 0,
         # Get Mean # of Tissues
         tissueSum = 0
         for geneID in geneList:
-            geneRecord = gtmDB.find_one( { 'primary_gene_id' : geneID } )
+            geneRecord = gtmDB.find_one( { 'gene_id' : geneID } )
             if not geneRecord:
                 continue
             numTissues = len(geneRecord.get('tissue_list'))
@@ -242,19 +242,21 @@ def createModuleProteinUniversalityField(skipVal = 0, limitVal = 0,
 
 # createModuleHousekeepingIndexField: Adds 'housekeeping' to modDB. 
 # 'housekeeping' represents the % of genes in module that are housekeeping.
-def createModuleHousekeepingIndexField(shuffle = False):
+def createModuleHousekeepingIndexField(skipVal = 0, limitVal = 10000,
+                                       shuffle = False):
     # Open DB Connection
     cli = MongoClient()
     db = cli.db
     if shuffle:
         modDB = db.shuffleModules
-        gtmDB = db.shuffleGeneTissueMap
+        gtmDB = db.shuffleNormGeneTissueMap
     else:
         modDB = db.modules
         gtmDB = db.normGeneTissueMap
 
     # Iterate through DB
-    for moduleRecord in modDB.find(snapshot = True, timeout = False):
+    for moduleRecord in modDB.find(snapshot = True, timeout = False,
+                                   skip = skipVal, limit = limitVal):
         moduleID = moduleRecord.get('module_id')
         if PRINT_PROGRESS:
             print moduleID
@@ -268,7 +270,7 @@ def createModuleHousekeepingIndexField(shuffle = False):
 
         # Iterate through Genes
         for geneID in geneList:
-            geneRecord = ngtmDB.find_one( { 'primary_gene_id' : geneID } )
+            geneRecord = gtmDB.find_one( { 'gene_id' : geneID } )
             if geneRecord:
                tissueList = geneRecord.get('tissue_list')
                numTissues = len(tissueList)
@@ -329,11 +331,11 @@ def constructGeneModuleMap(shuffle = False):
 # Module ID files contain a list of module IDs, with one per line.
 
 # createAllModuleIDFiles: Creates module ID files for all tissues.
-def createAllModuleIDFiles(shuffleVal = False):
+def createAllModuleIDFiles(shuffle = False):
     for tissue in AUGMENTED_TISSUE_LIST:
         if PRINT_PROGRESS:
             print tissue
-        createTissueModuleIDFile(tissue, shuffle = shuffleVal)
+        createTissueModuleIDFile(tissue, shuffle = shuffle)
 
 # createTissueModuleIDFile: Creates module ID file for <tissue>.
 def createTissueModuleIDFile(tissue, shuffle = False):
@@ -347,7 +349,7 @@ def createTissueModuleIDFile(tissue, shuffle = False):
 
     # Open Raw File
     if shuffle:
-        inFilePath = PATH_TO_SHUFFLE_MODULES
+        inFilePath = PATH_TO_SHUFFLE_SPICI_MODULES
         inFileName = SHUFFLE_SPICI_MODULES_BASE_FILENAME % tissue
     else:
         inFilePath = PATH_TO_TISSUE_SPICI_MODULES
