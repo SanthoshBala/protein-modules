@@ -140,13 +140,60 @@ def createModuleDatabase(outFile):
 # analyzeTissueMultiplicity: Computes tissue multiplicity for vertices,
 # edges, and modules.
 def analyzeTissueMultiplicity(outFile):
-    
 
     # Compute Protein Tissue Multiplicity
     startTime = time.time()
     outFile.write('Computing Protein Tissue Multiplicity...')
     
     getProteinTissueMultiplicity()
+
+    elapsedTime = time.time() - startTime
+    h, m, s = hoursMinutesSeconds(elapsedTime)
+    outFile.write('DONE\n')
+    outFile.write('\tTime Elapsed: %d:%d:%d\n\n' % (h,m,s))
+    outFile.flush()
+
+    # Compute Interaction Tissue Multiplicity
+    startTime = time.time()
+    outFile.write('Computing Interaction Tissue Multiplicity...')
+    
+    getInteractionTissueMultiplicity()
+
+    elapsedTime = time.time() - startTime
+    h, m, s = hoursMinutesSeconds(elapsedTime)
+    outFile.write('DONE\n')
+    outFile.write('\tTime Elapsed: %d:%d:%d\n\n' % (h,m,s))
+    outFile.flush()
+
+    # Compute Module Tissue Multiplicity
+    startTime = time.time()
+    outFile.write('Computing Module Tissue Multiplicity...')
+    
+    getModuleTissueMultiplicity()
+
+    elapsedTime = time.time() - startTime
+    h, m, s = hoursMinutesSeconds(elapsedTime)
+    outFile.write('DONE\n')
+    outFile.write('\tTime Elapsed: %d:%d:%d\n\n' % (h,m,s))
+    outFile.flush()
+
+    # Compute Module Protein Universality
+    startTime = time.time()
+    outFile.write('Computing Module Protein Universality...')
+    
+    getModuleProteinUniversality()
+
+    elapsedTime = time.time() - startTime
+    h, m, s = hoursMinutesSeconds(elapsedTime)
+    outFile.write('DONE\n')
+    outFile.write('\tTime Elapsed: %d:%d:%d\n\n' % (h,m,s))
+    outFile.flush()
+
+    # Compute Module Housekeeping Index
+    startTime = time.time()
+    outFile.write('Computing Module Housekeeping Index...')
+    
+    getModuleHousekeepingIndex()
 
     elapsedTime = time.time() - startTime
     h, m, s = hoursMinutesSeconds(elapsedTime)
@@ -694,7 +741,7 @@ def main():
     createModuleDatabase(f)
     createModuleIDFilesForAllNetworks(f)
     analyzeProteomeCoverage(f)
-    computeTissueMultiplicity(f)
+    analyzeTissueMultiplicity(f)
     return
 
-#main()
+main()
