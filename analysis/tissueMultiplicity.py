@@ -18,7 +18,7 @@ from graphs.graphUtil import *
 
 # Utility Imports
 from common.matrices import *
-
+from common.statistics import *
 
 # - - - - - - - - - - - TISSUE SPECIFICITY - - - - - - - - - - #
 
@@ -66,7 +66,9 @@ def getInteractionTissueMultiplicity():
 
     # Get Matrix
     numTissues = len(FUNCTIONAL_TISSUE_LIST)
-    matrix = constructSquareIntegerMatrix(numTissues + 1)
+    bucketSize = 10
+    numBuckets = numTissues/bucketSize + 1
+    matrix = constructSquareIntegerMatrix(numBuckets)
     
     # Get Global Interaction Set
     globalGraph = getTissueSubgraph('global')
@@ -78,8 +80,9 @@ def getInteractionTissueMultiplicity():
             print interaction
 
         proteinA = interaction[0]
-        proteinB = interaction[0]
+        proteinB = interaction[1]
 
+        # Get DB Records
         recordA = ngtmDB.find_one( { 'gene_id' : proteinA } )
         if not recordA:
             continue
@@ -87,16 +90,25 @@ def getInteractionTissueMultiplicity():
         if not recordB:
             continue
 
-        tissuesA = len(recordA.get('tissue_list'))
-        tissuesB = len(recordB.get('tissue_list'))
+        # Get Tissues Sets
+        tissuesA = set(recordA.get('tissue_list'))
+        tissuesB = set(recordB.get('tissue_list'))
+        intersectionTissues = tissuesA.intersection(tissuesB)
 
-        matrix[tissuesA][tissuesB] = matrix[tissuesA][tissuesB] + 1
-        matrix[tissuesB][tissuesA] = matrix[tissuesB][tissuesA] + 1
+        # Get Number of Tissues Per Set
+        numTissuesA = len(tissuesA)
+        numTissuesB = len(tissuesB)
+        numTissuesInt = len(intersectionTissues)
+
+        hashA = hashNumberToHistogramBucket(numTissuesA, bucketSize)
+        hashB = hashNumberToHistogramBucket(numTissuesB, bucketSize)
+        hashInt = hashNumberToHistogramBucket(numTissuesInt, bucketSize)
+
+        matrix[hashA][hashInt] = matrix[hashA][hashInt] + 1
+        matrix[hashB][hashInt] = matrix[hashB][hashInt] + 1
 
     # Write Matrix to File
-    for i in range(numTissues + 1):
-        for j in range(numTissues + 1):
-            outFile.write('%d\t%d\t%d\n' % (i, j, matrix[i][j]))
+    writeMatrixToFile(matrix, outFile)
 
     # Close File and DB Connection
     outFile.close()
