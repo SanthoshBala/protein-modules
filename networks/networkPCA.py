@@ -28,11 +28,11 @@ from graphs.graphUtil import *
 
 PATH_TO_PCA_ANALYSIS = PATH_TO_ANALYSIS + 'pca/'
 GENE_ASSAY_FILENAME = 'tissue.gene.assay.matrix'
-SHUFFLED_GENE_ASSAY_FILENAME = 'shuffled.tissue.gene.assay.matrix'
+SHUFFLE_GENE_ASSAY_FILENAME = 'shuffle.tissue.gene.assay.matrix'
 PPI_ASSAY_FILENAME = 'tissue.ppi.assay.matrix'
-SHUFFLED_PPI_ASSAY_FILENAME = 'shuffled.tissue.ppi.assay.matrix'
+SHUFFLE_PPI_ASSAY_FILENAME = 'shuffle.tissue.ppi.assay.matrix'
 MODULE_ASSAY_FILENAME = 'tissue.module.assay.matrix'
-SHUFFLED_MODULE_ASSAY_FILENAME = 'shuffled.tissue.module.assay.matrix'
+SHUFFLE_MODULE_ASSAY_FILENAME = 'shuffle.tissue.module.assay.matrix'
 
 # Tissue List with Random Order
 RANDOM_TISSUE_LIST = [
@@ -123,17 +123,29 @@ RANDOM_TISSUE_LIST = [
 
 # createGeneAssayMatrix: Creates matrix describing assays of tissues
 # in each gene "condition." For use in PCA analysis.
-def createGeneAssayMatrix():
+def createGeneAssayMatrix(shuffle = False):
     # Open DB Connection
     cli = MongoClient()
     db = cli.db
-    ngtmDB = db.normGeneTissueMap
+    if shuffle:
+        ngtmDB = db.shuffleNormGeneTissueMap
+    else:
+        ngtmDB = db.normGeneTissueMap
 
     # Open Output File
-    outFile = open(PATH_TO_PCA_ANALYSIS + GENE_ASSAY_FILENAME, 'w')
+    if shuffle:
+        outFilePath = PATH_TO_PCA_ANALYSIS
+        outFileName = SHUFFLE_GENE_ASSAY_FILENAME
+    else:
+        outFilePath = PATH_TO_PCA_ANALYSIS
+        outFileName = GENE_ASSAY_FILENAME
+    outFile = open(outFilePath + outFileName, 'w')
 
     # Iterate through <ngtmDB>
     for geneRecord in ngtmDB.find():
+        geneID = geneRecord.get( 'gene_id' )
+        if PRINT_PROGRESS:
+            print geneID
 
         geneTissues = geneRecord.get('tissue_list')
 
@@ -165,36 +177,51 @@ def createGeneAssayMatrix():
 
 # createPPIAssayMatrix: Creates matrix describing assays of tissues
 # in each PPI "condition." For use in PCA analysis.
-def createPPIAssayMatrix():
+def createPPIAssayMatrix(shuffle = False):
     # Open DB Connection
     cli = MongoClient()
     db = cli.db
-    ngtmDB = db.normGeneTissueMap
+    if shuffle:
+        ngtmDB = db.shuffleNormGeneTissueMap
+    else:
+        ngtmDB = db.normGeneTissueMap
 
     # Open Output File
-    outFile = open(PATH_TO_PCA_ANALYSIS + GENE_ASSAY_FILENAME, 'w')
+    if shuffle:
+        outFilePath = PATH_TO_PCA_ANALYSIS
+        outFileName = SHUFFLE_PPI_ASSAY_FILENAME
+    else:
+        outFilePath = PATH_TO_PCA_ANALYSIS
+        outFileName = PPI_ASSAY_FILENAME
 
-    outFile = open(PATH_TO_PCA_ANALYSIS + PPI_ASSAY_FILENAME, 'w')
+    outFile = open(outFilePath + outFileName, 'w')
 
     # Get Global Graph Interaction Set
     graph = getTissueSubgraph('global')
     interactionSet = getInteractionSet(graph)
 
+    numTissues = len(RANDOM_TISSUE_LIST)
+
     # Iterate through Edges
     for interaction in interactionSet:
+        if PRINT_PROGRESS:
+            print interaction
+
         geneA = interaction[0]
         geneB = interaction[1]
 
         # Get Tissue Lists
         recordA = ngtmDB.find_one( { 'gene_id' : geneA } )
-        recordB = ngtmDB.find_one( { 'gene_id' : geneB } )
-        if not recordA or not recordB:
+        if not recordA:
             continue
-        tissuesA = recordA.get('tissue_list')
-        tissuesB = recordB.get('tissue_list')
+        recordB = ngtmDB.find_one( { 'gene_id' : geneB } )
+        if not recordB:
+            continue
+
+        tissuesA = recordA.get( 'tissue_list' )
+        tissuesB = recordB.get( 'tissue_list' )
 
         # Iterate through Tissues
-        numTissues = len(RANDOM_TISSUE_LIST)
         for i in range(numTissues):
             tissue = RANDOM_TISSUE_LIST[i]
             
@@ -221,23 +248,37 @@ def createPPIAssayMatrix():
         
 # createModuleAssayMatrix: Creates matrix describing assays of tissues
 # in each module "condition." For use in PCA analysis.
-def createModuleAssayMatrix():
+def createModuleAssayMatrix(shuffle = False):
     # Open DB Connection
     cli = MongoClient()
     db = cli.db
-    modDB = db.modules
+    if shuffle:
+        modDB = db.shuffleModules
+    else:
+        modDB = db.modules
 
     # Open Output File
-    outFile = open(PATH_TO_PCA_ANALYSIS + GENE_ASSAY_FILENAME, 'w')
+    if shuffle:
+        outFilePath = PATH_TO_PCA_ANALYSIS
+        outFileName = SHUFFLE_MODULE_ASSAY_FILENAME
+    else:
+        outFilePath = PATH_TO_PCA_ANALYSIS
+        outFileName = MODULE_ASSAY_FILENAME
+
+    outFile = open(outFilePath + outFileName, 'w')
 
     numModules = modDB.count()
+    numTissues = len(RANDOM_TISSUE_LIST)
 
     # Iterate through Modules
     for modRecord in modDB.find():
+        moduleID = modRecord.get('module_id')
         modTissues = modRecord.get('tissue_list')
 
+        if PRINT_PROGRESS:
+            print moduleID
+
         # Iterate through Tissues
-        numTissues = len(RANDOM_TISSUE_LIST)
         for i in range(numTissues):
             tissue = RANDOM_TISSUE_LIST[i]
             
@@ -261,30 +302,5 @@ def createModuleAssayMatrix():
 
     return
 
-
-# - - - - - - - - - - SHUFFLED MATRIX CREATION - - - - - - - - - - #
-
-
-
-# createShuffledGeneAssayMatrix: Creates gene assay matrix using shuffled
-# tissue labels by aligning FUNCTIONAL and RANDOM tissue lists.
-def createShuffledGeneAssayMatrix():
-    # Open DB Connection
-    cli = MongoClient()
-    db = cli.db
-    ngtmDB = db.normGeneTissueMap
-
-    # Open Output File
-    outFile = open(PATH_TO_PCA_ANALYSIS + SHUFFLED_GENE_ASSAY_FILENAME, 'w')
-
-    # Iterate through <ngtmDB>
-    for geneRecord in ngtmDB.find():
-        
-        geneTissues = geneRecord.get('tissue_list')
-
-        # Iterate through Tissues
-        numTissues = len(RANDOM_TISSUE_LIST)
-        for i in range(numTissues):
-            tissue = Ran
             
         
