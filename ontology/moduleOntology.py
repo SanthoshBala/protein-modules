@@ -1,66 +1,76 @@
 #! /usr/bin/python
 
-# Santhosh Balasubramanian
-# March 6, 2013
+# moduleOntology.py
+# Author: Santhosh Balasubramanian
+# Created: March 6, 2013
+# Last Modified: April 16, 2013
 
-from settings import *
+
+# Library Imports
+from fisher import *
 from pymongo import *
 
-# getEntrezFromEnsembl
-def getEntrezFromEnsembl(ensembl_gene_id):
-    # Open DB Connection
-    cli = MongoClient()
-    db = cli.db
-    gim = db.geneIDMap
+# Global Imports
+from settings import *
 
-    record = gim.find_one( { 'ensembl_gene_id' : ensembl_gene_id } )
-    if record == None:
-        return None
-    entrezID = record.get('entrez_gene_id')
-    if entrezID == None:
-        return None
-    else:
-        return entrezID[0]
+# Nomenclature Imports
+from nomenclature.geneID import *
 
 
-# createModuleAnnotationDB
-def createModuleAnnotationDB():
+# createModuleOntologyDB
+def createModuleOntologyDB(hypergeometric = True):
     # Open DB Connection
     cli = MongoClient()
     db = cli.db
     modDB = db.modules
-    maDB = db.moduleAnnotation
-    gaDB = db.geneAnnotation
+    modOntDB = db.moduleOntology
+    geneOntDB = db.geneOntology
 
     # Iterate through Module DB
     for record in modDB.find():
         moduleID = record.get('module_id')
-        print moduleID
         geneList = record.get('gene_list')
+        if PRINT_PROGRESS:
+            print moduleID
+        
+        # Initialize <moduleOntology> Record
+        modOntologyRecord = { 'module_id' : moduleID }
+        modFunctions = set()
+        modProcesses = set()
+        modComponents = set()
+        rejectedAnnotations = set()
 
-        newModuleRecord = {}
-        newModuleRecord.update( { 'module_id' : moduleID } )
-
-        moduleFunctions = set()
-        moduleProcesses = set()
-        moduleComponents = set()
-
-        # Iterate through Genes in this Module
+        # Get Entrez Gene List
+        entrezGeneList = []
         for geneID in geneList:
-            # Get Entrez Gene ID
             if 'ENSG' in geneID:
-                geneID = getEntrezFromEnsembl(geneID)
-                if geneID == None:
+                entrezID = getEntrezForEnsemblGene(geneID)
+                if not entrezID:
                     continue
-            
+            else:
+                entrezID = geneID
+            entrezGeneList.append(entrezID)
+        
+        # Iterate through Genes in <moduleID>
+        for geneID in entrezGeneList:
             # Get Gene Annotations
-            annotRecord = gaDB.find_one( { 'entrez_gene_id' : geneID } )
-            if annotRecord == None:
-                continue
+            geneFuncs, geneProcs, geneComps = getGeneAnnotation(geneID,
+                                                                combined = False)
             
-            geneFunctionSet = set()
-            geneProcessSet = set()
-            geneComponentSet = set()
+            for funcAnnot in geneFuncs:
+                # Fill in Matrix for Fisher's Exact Test                
+                constructQueryForGO('function', funcAnnot, entrezGeneList)
+
+        # Iterate through Genes in <moduleID>
+        for geneID in geneList:
+            # Get Gene Annotations
+            geneOntologyRecord = goDB.find_one( { 'entrez_gene_id' : geneID } )
+            if not geneOntologyRecord:
+                continue
+
+            geneFunctions = set()
+            geneProcesses = set()
+            geneComponents = set()
 
             geneFunctionList = annotRecord.get('function')
             geneProcessList = annotRecord.get('process')
