@@ -213,6 +213,21 @@ def constructQueryForGeneRecord(geneRecord):
 
     return query
 
+# constructQueryForGO: Construct MongoDB Query that matches the annotation.
+def constructQueryForGO(goTerm, annotationType = 'function', geneList = None):
+    # Initialize Query
+    if geneList:
+        queryTemplateStr = '{ "%s":"%s", "entrez_gene_id" : {"$or" : "%s"} }'
+        queryStr = queryTemplateStr % (annotationType, goTerm, str(geneList))
+    else:
+        queryTemplateStr = '{ "%s" : [ "%s", "%s" ] }' 
+        print queryTemplateStr
+        queryStr = queryTemplateStr % (annotationType, goTerm[0], goTerm[1])
+        print queryStr
+
+    query = json.loads(queryStr)
+
+    return query
 
 # - - - - - - - - - - MISCELLANEOUS - - - - - - - - - - #
 
