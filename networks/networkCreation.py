@@ -81,9 +81,9 @@ def createIntersectionNetwork(shuffle = False):
     housekeepingSet = set()
     housekeepingRecords = gtmDB.find( { 'tissue_list' : 
                                         { '$size' : numTissues } }, 
-                                      { 'module_id' : 1 } )
+                                      { 'gene_id' : 1 } )
     for record in housekeepingRecords:
-        housekeepingSet.add(record.get('module_id'))
+        housekeepingSet.add(record.get('gene_id'))
 
     # Iterate through <inFile>
     for line in inFile:
