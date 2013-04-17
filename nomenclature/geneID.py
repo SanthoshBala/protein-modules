@@ -166,10 +166,13 @@ def getEntrezForEnsemblGene(ensemblID):
     
     geneRecord = gim.find_one( { 'ensembl_gene_id' : ensemblID } )
     if geneRecord:
-        entrezID = geneRecord.get( 'entrez_gene_id' )[0]
+        entrezIDList = geneRecord.get( 'entrez_gene_id' )
+        if entrezIDList:
+            entrezID =  entrezIDList[0]
+        else:
+            entrezID = None
     else:
-        return None
-
+        entrezID = None
 
     # Close DB Connection
     cli.close()
