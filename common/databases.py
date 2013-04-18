@@ -217,8 +217,12 @@ def constructQueryForGeneRecord(geneRecord):
 def constructQueryForGO(goTerm, annotationType = 'function', geneList = None):
     # Initialize Query
     if geneList:
-        queryTemplateStr = '{ "%s":"%s", "entrez_gene_id" : {"$or" : "%s"} }'
-        queryStr = queryTemplateStr % (annotationType, goTerm, str(geneList))
+        orString = ','.join( [ '{ "entrez_gene_id" : "%s" }' % gene for gene in geneList ] )
+        queryTemplateStr = '{ "$and" : [ { "%s" : [ "%s", "%s" ] }, { "$or" : [ %s ] } ] }'
+        print queryTemplateStr
+        queryStr = queryTemplateStr % (annotationType, goTerm[0], goTerm[1], 
+                                       orString)
+        print queryStr
     else:
         queryTemplateStr = '{ "%s" : [ "%s", "%s" ] }' 
         print queryTemplateStr
