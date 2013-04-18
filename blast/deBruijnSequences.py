@@ -17,6 +17,7 @@ from pymongo import *
 from settings import *
 
 # Nomenclature Imports
+from nomenclature.geneID import *
 from nomenclature.proteinID import *
 
 # Utility Imports
@@ -128,17 +129,17 @@ def getExchangeSimilarProteins():
 
         # Get Proteins
         if 'ENSG' in geneA:
-            proteinA = getRefseqProteinForEnsemblGene(geneA)
+            proteinA = getUniprotProteinForEnsemblGene(geneA)
         else:
-            proteinA = getRefseqProteinForEntrezGene(geneA)
+            proteinA = getUniprotProteinForEntrezGene(geneA)
         
         if not proteinA:
             continue
 
         if 'ENSG' in geneB:
-            proteinB = getRefseqProteinForEnsemblGene(geneB)
+            proteinB = getUniprotProteinForEnsemblGene(geneB)
         else:
-            proteinB = getRefseqProteinForEntrezGene(geneB)
+            proteinB = getUniprotProteinForEntrezGene(geneB)
             
         if not proteinB:
             continue
