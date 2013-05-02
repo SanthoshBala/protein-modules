@@ -107,7 +107,7 @@ def getExchangeSimilarGenes(shuffle = False):
 def getExchangeSimilarProteins():
     # Open Input Files
     genePairFileName = SIMILAR_GENE_PAIRS_FILENAME
-    inFilePath = PATH_TO_MODULE_SIMILARITY
+    inFilePath = PATH_TO_EXCHANGE_SIMILARITY
     genePairFile = open(inFilePath + genePairFileName, 'r')
 
     # Open Output Files
@@ -129,17 +129,17 @@ def getExchangeSimilarProteins():
 
         # Get Proteins
         if 'ENSG' in geneA:
-            proteinA = getUniprotProteinForEnsemblGene(geneA)
+            proteinA = getUniprotForEnsemblGene(geneA)
         else:
-            proteinA = getUniprotProteinForEntrezGene(geneA)
+            proteinA = getUniprotForEntrezGene(geneA)
         
         if not proteinA:
             continue
 
         if 'ENSG' in geneB:
-            proteinB = getUniprotProteinForEnsemblGene(geneB)
+            proteinB = getUniprotForEnsemblGene(geneB)
         else:
-            proteinB = getUniprotProteinForEntrezGene(geneB)
+            proteinB = getUniprotForEntrezGene(geneB)
             
         if not proteinB:
             continue
