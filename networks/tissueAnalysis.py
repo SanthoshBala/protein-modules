@@ -505,38 +505,6 @@ def getTissueSubgraphLCCDegreePlots():
 
     return
 
-# - - - - - MEAN PATH LENGTHS - - - - - #
-
-def getTissueSubgraphMeanPathLengths():
-    # Open Output File
-    outFilename = 'tissue.ppi.mean_path_length'
-    outFilepath = PATH_TO_TISSUE_ANALYSIS + outFilename
-    outFile = open(outFilepath, 'w')
-
-    AUGMENTED_TISSUE_LIST = ['global'] + FUNCTIONAL_TISSUE_LIST
-
-    # Iterate through all tissues
-    for tissue in AUGMENTED_TISSUE_LIST:
-        print tissue
-        graph = getTissueSubgraph(tissue)
-        
-        distances = getPathLengths(graph)
-        distSum = 0
-        numPaths = 0
-        # Sum over all shortest paths
-        for vertex in graph.vertices():
-            distList = list(distances[vertex].a)
-            for distance in distList:
-                distSum = distSum + distance
-                numPaths = numPaths + 1
-
-        # This scheme double counts, so divide by two
-        distSum = distSum / 2
-        numPaths = numPaths / 2
-        meanDist = distSum/float(numPaths)
-
-        outFile.write('%s\t%f\n' % (tissue, meanDist))
-        
 # - - - - - DEGREE DISTRIBUTIONS - - - - - #
 
 def getTissueSubgraphDegreeHistograms():
