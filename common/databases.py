@@ -148,6 +148,22 @@ def dropModuleDBs():
     cli.close()
     
     return
+
+
+# dropOntologyDBs: Drop <geneOntology> and <moduleOntology>.
+def dropOntologyDBs():
+    # Open DB Connection
+    cli = MongoClient()
+    db = cli.db
+    
+    # Drop Ontology DBs
+    db.geneOntology.drop()
+    db.moduleOntology.drop()
+
+    # Close DB Connection
+    cli.close()
+
+    return
     
 # dropAllDBs: Drop all known MongoDB databases.
 def dropAllDBs():
@@ -219,15 +235,11 @@ def constructQueryForGO(goTerm, annotationType = 'function', geneList = None):
     if geneList:
         orString = ','.join( [ '{ "entrez_gene_id" : "%s" }' % gene for gene in geneList ] )
         queryTemplateStr = '{ "$and" : [ { "%s" : [ "%s", "%s" ] }, { "$or" : [ %s ] } ] }'
-        print queryTemplateStr
         queryStr = queryTemplateStr % (annotationType, goTerm[0], goTerm[1], 
                                        orString)
-        print queryStr
     else:
         queryTemplateStr = '{ "%s" : [ "%s", "%s" ] }' 
-        print queryTemplateStr
         queryStr = queryTemplateStr % (annotationType, goTerm[0], goTerm[1])
-        print queryStr
 
     query = json.loads(queryStr)
 
