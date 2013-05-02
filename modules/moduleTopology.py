@@ -7,7 +7,9 @@
 
 
 # Python Imports
+import os
 import math
+import copy
 from multiprocessing import Process
 
 # Library Imports
@@ -17,9 +19,11 @@ from graph_tool.all import *
 from settings import *
 
 # Module Imports
-from moduleUtil import *
+from modules.moduleUtil import *
+from modules.moduleDatabase import *
 
 # Graph Imports
+from graphs.graphIO import *
 from graphs.graphUtil import *
 
 # Ontology Imports
@@ -54,6 +58,7 @@ PROPAGATE_GENES = False
 INITIALIZE_MODULE_TOPOLOGY = False
 
 MODULE_TOPOLOGY_HEIGHT_BASE_FILENAME = MODULE_TOPOLOGY_BASE_FILENAME + '.heights'
+PATH_TO_SUPER_MODULES = PATH_TO_ANALYSIS + 'super_modules/'
 
 
 # - - - - - - - - - - MODULE TOPOLOGY CREATION - - - - - - - - - - #
@@ -61,9 +66,9 @@ MODULE_TOPOLOGY_HEIGHT_BASE_FILENAME = MODULE_TOPOLOGY_BASE_FILENAME + '.heights
 
 # createAllModuleTopologies: Creates module topologies for tissue
 # ppi subgraphs in range.
-def createAllModuleTopologies(initialize = INITIALIZE_MODULE_TOPOLOGY,
-                              propagate = PROPAGATE_GENES, 
-                              minimum = 0, maximum = 85):
+def createAllModuleTopologies(minimum = 0, maximum = 85, 
+                              initialize = INITIALIZE_MODULE_TOPOLOGY,
+                              propagate = PROPAGATE_GENES):
 
     # Iterate through Tissues
     for tissue in AUGMENTED_TISSUE_LIST[minimum:maximum]:
@@ -102,7 +107,7 @@ def createAllModuleTopologies(initialize = INITIALIZE_MODULE_TOPOLOGY,
         geneIDProp = moduleTopology.vertex_properties['gene_id']
 
         # Open Heights File
-        heightsFilepath = outFilePath + '.heights'
+        heightsFilePath = outFilePath + '.heights'
         heightsFile = open(heightsFilePath, 'w')
 
         # Write Heights
@@ -158,7 +163,7 @@ def getModuleTopology(graph, initialize = INITIALIZE_MODULE_TOPOLOGY,
 def moduleTopologyHelper(graph, moduleTopology, frontier, height,
                          initialize = INITIALIZE_MODULE_TOPOLOGY,
                          propagate = PROPAGATE_GENES):
-    moduleTempFilename = PATH_TO_MODULES + 'modules.temp'
+    moduleTempFilename = PATH_TO_MODULES + '%s.modules.temp' % str(os.getpid())
 
     # Recursive Base Case 1 - Graph = 1 Node
     if graph.num_vertices() == 1:
@@ -242,8 +247,8 @@ def moduleTopologyHelper(graph, moduleTopology, frontier, height,
     # Reset Frontier
     frontier = dict()
     if propagate:
-        newFrontierNodes = getVertexSetByProperty(moduleTopology, heightProp, 
-                                                  height + 1)
+        newFrontierNodes = getVertexListByProperty(moduleTopology, heightProp, 
+                                                   height + 1)
         for node in newFrontierNodes:
             geneName = geneIDProp[node].split('@')[0]
             frontier.update( { geneName : node })
@@ -253,7 +258,7 @@ def moduleTopologyHelper(graph, moduleTopology, frontier, height,
                 geneName = geneIDProp[vertex]
                 frontier.update( { geneName : vertex } )
         else:
-            newFrontierNodes = getVertexSetByProperty(moduleTopology, 
+            newFrontierNodes = getVertexListByProperty(moduleTopology, 
                                                       heightProp, 
                                                       height + 1)
             for node in newFrontierNodes:
@@ -436,7 +441,7 @@ def getTopologyBranchingSeries(topology):
 
     # Iterate through Tree Levels
     for i in range(height):
-        vertexSet = getVertexSetByProperty(topology, heightProp, i)
+        vertexSet = getVertexListByProperty(topology, heightProp, i)
         numVertices = len(vertexSet)
 
         # Iterate through Level Vertices
@@ -515,7 +520,7 @@ def createOntologyExpansionFiles():
 
         # Get 0 Height Nodes
         heightProp = topology.vertex_properties['height']
-        zeroHeightNodes = getVertexSetByProperty(topology, heightProp, 0)
+        zeroHeightNodes = getVertexListByProperty(topology, heightProp, 0)
 
         # For each leaf, add line to output files
         parentProp = topology.vertex_properties['parent']
@@ -551,9 +556,9 @@ def createOntologyExpansionFiles():
 
     return
 
-# getOntologyAnnotation: Note that this function assumes the topology
+# getTopologyAnnotation: Note that this function assumes the topology
 # was formed by INITIALIZATION without PROPAGATION.
-def getOntologyAnnotation(topology):
+def getTopologyAnnotation(topology):
     # Open DB Connection
     cli = MongoClient()
     db = cli.db
@@ -568,41 +573,48 @@ def getOntologyAnnotation(topology):
     # Initialize topologyAnnotation ( gene_id --> set() )
     functionAnnotation = {}
     processAnnotation = {}
+    componentAnnotation = {}
     
     # Initialize topology Annotation with nodes at height 0
     height = getTopologyHeight(topology)
     heightProp = topology.vertex_properties['height']
-    heightZeroNodes = getVertexSetByProperty(topology, heightProp, 0)
+    heightZeroNodes = getVertexListByProperty(topology, heightProp, 0)
 
     for node in heightZeroNodes:
         geneID = geneIDProp[node]
         
         # Convert 'ENSG' to Entrez if Necessary
         if 'ENSG' in geneID:
-            functions, processes = getEnsemblGeneFunctionsProcesses(geneID)
+            funcs, procs, comps = getGeneAnnotation(geneID, 
+                                                    nomenclature = 'ensembl', 
+                                                    combined = False)
         else:
-            functions, processes = getEntrezGeneFunctionsProcesses(geneID)
+            funcs, procs, comps = getGeneAnnotation(geneID, combined = False)
 
-        if functions == None or processes == None:
-            print geneID
+        if not funcs or not procs or not comps:
             continue
 
         # Get Sets
-        functionTuples = []
-        processTuples = []
-        for function in functions:
-            functionTuples.append(tuple(function))
-        for process in processes:
-            processTuples.append(tuple(process))
-        functionSet = set(functionTuples)
-        processSet= set(processTuples)
-        
-        functionAnnotation.update( { geneID : functionSet } )
-        processAnnotation.update( { geneID : processSet } )
-        
+        funcTuples = []
+        procTuples = []
+        compTuples = []
+        for func in funcs:
+            funcTuples.append(tuple(func))
+        for proc in procs:
+            procTuples.append(tuple(proc))
+        for comp in comps:
+            compTuples.append(tuple(comp))
+        funcSet = set(funcTuples)
+        procSet= set(procTuples)
+        compSet = set(compTuples)
+
+        functionAnnotation.update( { geneID : funcSet } )
+        processAnnotation.update( { geneID : procSet } )
+        componentAnnotation.update( { geneID : compSet } )
+
     # Iterate through height 1 to height
     for i in range(1, height):
-        levelNodes = getVertexSetByProperty(topology, heightProp, i)
+        levelNodes = getVertexListByProperty(topology, heightProp, i)
 
         # Iterate through all nodes at this level
         for node in levelNodes:
@@ -610,6 +622,7 @@ def getOntologyAnnotation(topology):
             
             nodeFunctions = set()
             nodeProcesses = set()
+            nodeComponents = set()
 
             # Get children
             neighbors = node.all_neighbours()
@@ -624,19 +637,73 @@ def getOntologyAnnotation(topology):
             for child in children:
                 childFunctions = functionAnnotation.get(child)
                 childProcesses = processAnnotation.get(child)
-                
+                childComponents = componentAnnotation.get(child)
+
                 # We don't have annotations for all nodes, so
                 # handle this case gracefully
                 if childFunctions == None:
                     continue
                 if childProcesses == None:
                     continue
+                if childComponents == None:
+                    continue
 
-                nodeFunctions = nodeFunctions.union(childFunctions)
-                nodeProcesses = nodeProcesses.union(childProcesses)
+                if len(nodeFunctions) == 0:
+                    nodeFunctions = copy.copy(childFunctions)
+                    nodeProcesses = copy.copy(childProcesses)
+                    nodeComponents = copy.copy(childComponents)
+                else:
+                    nodeFunctions = nodeFunctions.intersection(childFunctions)
+                    nodeProcesses = nodeProcesses.intersection(childProcesses)
+                    nodeComponents = nodeComponents.intersection(childComponents)
             
             # Add annotations to dictionaries
             functionAnnotation.update( { geneID : nodeFunctions } )
             processAnnotation.update( { geneID : nodeProcesses } )
+            componentAnnotation.update( { geneID : nodeComponents } )
 
-    return functionAnnotation, processAnnotation
+    return functionAnnotation, processAnnotation, componentAnnotation
+
+# getSuperModules
+def getSuperModules(tissue):
+    # Get Tissue Subgraph
+    graph = getTissueSubgraph(tissue)
+
+    # Get Module Topology
+    topology = getModuleTopology(graph)
+    heightProp = topology.vertex_properties['height']
+    idProp = topology.vertex_properties['gene_id']
+
+    # Get Annotations
+    functions, processes, components = getTopologyAnnotation(topology)
+
+    # Get Height
+    height = getTopologyHeight(topology)
+
+    # Open Output File
+    outFilePath = PATH_TO_SUPER_MODULES
+    outFileName = '%s.super.modules' % tissue
+    outFile = open(outFilePath + outFileName, 'w')
+
+    # Iterate through Possible Super Modules
+    for i in range(2, height):
+        vertexList = getVertexListByProperty(topology, heightProp, i)
+
+        # Iterate through Vertices at this Height
+        for vertex in vertexList:
+            moduleID = idProp[vertex]
+            outFile.write('%s\n' % moduleID)
+            vertexFuncs = functions.get(moduleID)
+            for vFunc in vertexFuncs:
+                outFile.write('\t%s\n' % str(vFunc))
+            vertexProcs = processes.get(moduleID)
+            for vProc in vertexProcs:
+                outFile.write('\t%s\n' % str(vProc))
+            vertexComps = components.get(moduleID)
+            for vComp in vertexComps:
+                outFile.write('\t%s\n' % str(vComp))
+
+    outFile.close()
+    
+    return
+

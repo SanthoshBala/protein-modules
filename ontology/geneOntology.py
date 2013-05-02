@@ -19,6 +19,9 @@ from settings import *
 # Utility Imports
 from common.strings import *
 
+# Nomenclature Imports
+from nomenclature.geneID import *
+
 # - - - - - - - - - - LOCAL SETTINGS - - - - - - - - - - #
 
 # *Always* tell NCBI who you are
@@ -28,10 +31,11 @@ Entrez.email = 'user@email.com'
 # Traceable Author Statement, Inferred by Curator, Inferred from Experiment
 ACCEPTABLE_GO_EVIDENCE = ['IPI', 'IDA', 'TAS', 'IC', 'EXP']
 
-QUERY_GO_TYPES = [ 'function', 'process' ] 
+QUERY_GO_TYPES = [ 'function', 'process', 'component' ] 
 
-GENE_ANNOTATION_FILENAME = 'human.gene2go'
-PATH_TO_GENE_ONTOLOGY = PATH_TO_DATA + 'ontology/'
+RAW_GENE_ONTOLOGY_FILENAME = 'raw.gene.annotation'
+GENE_ONTOLOGY_FILENAME = 'human.gene.annotation'
+PATH_TO_ONTOLOGY = PATH_TO_DATA + 'ontology/'
 
 # - - - - - - - - - - API CALL - - - - - - - - - - #
 
@@ -91,7 +95,7 @@ def createGeneOntologyDB():
     coll = db.geneOntology
 
     # Open Input File
-    inFile = open(PATH_TO_ANNOTATION + GENE_ONTOLOGY_FILENAME, 'r')
+    inFile = open(PATH_TO_ONTOLOGY + GENE_ONTOLOGY_FILENAME, 'r')
 
     # Track Entrez ID as Iterating
     currentEntrezID = '1'
@@ -157,11 +161,11 @@ def getGeneAnnotation(geneID, nomenclature = 'entrez', combined = True):
     elif nomenclature == 'ensembl':
         entrezID = getEntrezForEnsemblGene(geneID)
         if not entrezID:
-            return list()
+            return list(), list(), list()
         record = geneOntology.find_one( { 'entrez_gene_id' : entrezID } )
         
     if not record:
-        return list()
+        return list(), list(), list()
 
     functionList = record.get('function')
     processList = record.get('process')
