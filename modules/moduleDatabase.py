@@ -82,10 +82,10 @@ def createTissueRawModuleFile(tissue, shuffle = False):
 
 # createGraphRawModuleFile: Creates raw module file for <graph>.
 def createGraphRawModuleFile(graph, outputPath):
-    graphTempFile = PATH_TO_NETWORKS + 'graph.temp'
+    graphTempFile = PATH_TO_NETWORKS + '%s.graph.temp' % str(os.getpid())
 
     # Write Graph to Disk
-    writeCanonicalGraphToDisk(graph, graphTempFile)
+    writeGraph(graph, graphTempFile, canonical = True)
 
     # Run SPICi
     command = [ PATH_TO_SPICI_BINARY, '-i', graphTempFile, '-o', outputPath, 
@@ -169,9 +169,9 @@ def createModuleGermLayerField(shuffle = False):
     cli = MongoClient()
     db = cli.db
     if shuffle:
-        modDB = db.modules
+        modDB = db.shuffleMmodules
     else:
-        modDB = db.shuffleModules
+        modDB = db.modules
 
     # Iterate through DB
     for moduleRecord in modDB.find(snapshot = True, timeout = False):
@@ -179,7 +179,12 @@ def createModuleGermLayerField(shuffle = False):
         tissueList = moduleRecord.get('tissue_list')
         germLayerSet = set()
         for tissue in tissueList:
-            if tissue == 'global' or tissue == 'intersection':
+            if tissue == 'global':
+                continue
+            if tissue == 'intersection':
+                germLayerSet.add('endoderm')
+                germLayerSet.add('mesoderm')
+                germLayerSet.add('ectoderm')
                 continue
             germLayer = TISSUE_GERM_LAYER_MAP.get(tissue)
             germLayerSet.add(germLayer)
