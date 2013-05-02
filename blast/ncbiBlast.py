@@ -6,6 +6,9 @@
 # Last Modified: March 30, 2013
 
 
+# Python Imports
+import subprocess
+
 # Library Imports
 from pymongo import *
 
@@ -21,7 +24,13 @@ from common.statistics import *
 NCBI_REFSEQ_BASE_STRING = 'ref|%s|'
 PATH_TO_SIMILAR_PROTEIN_ANALYSIS = PATH_TO_MODULE_SIMILARITY + 'exchange/'
 PATH_TO_EXCHANGE_SIMILARITY = PATH_TO_MODULE_SIMILARITY + 'exchange/'
-
+PATH_TO_BLAST_DB = PATH_TO_DATA + 'blast/'
+FASTA_FILENAME = 'debruijn-exchange-similar.fasta'
+BLAST_DB_FILENAME = 'debruijn-exchange-similar.blastdb'
+PATH_TO_BLAST_BINARY = PATH_TO_LIBRARY_CODE + 'blast/bin/'
+MAKEBLASTDB_BINARY = 'makeblastdb'
+BLASTP_BINARY = 'blastp'
+PATH_TO_BLAST_ANALYSIS = PATH_TO_ANALYSIS + 'blast/'
 
 # - - - - - - - - - - FUNCTIONS - - - - - - - - - - #
 
@@ -70,13 +79,15 @@ def convertRefSeqProteinListToNCBIFormat(inFilePath, inFileName):
     return
 
 # parseNcbiBlastOutput: Parses NCBI blast output, writing results to DB.
-def parseNcbiBlastOutput(inFilePath, inFileName):
+def parseNcbiBlastOutput():
     # Open DB Connection
     cli = MongoClient()
     db = cli.db
     seqDB = db.proteinAlignment
 
     # Open Input File
+    inFilePath = PATH_TO_BLAST_ANALYSIS
+    inFileName = 'debruijn.exchange.similar.blast.analysis'
     inFile = open(inFilePath + inFileName, 'r')
 
     currentRawQueryID = ''
@@ -88,19 +99,13 @@ def parseNcbiBlastOutput(inFilePath, inFileName):
 
     # Iterate through File
     for line in inFile:
-        if line[0] == '\n':
-            continue
-        if line[0] == '#':
-            continue
-        
         lineFields = parseTabSeparatedLine(line)
 
         # Check Query Protein
         rawQueryID = lineFields[0]
         if rawQueryID != currentRawQueryID:
             currentRawQueryID = rawQueryID
-            cleanQueryID = rawQueryID.split('|')[-2].split('.')[0]
-            cleanQueryID = cleanQueryID.split('.')[0]
+            cleanQueryID = rawQueryID.split('|')[2]
 
             # Add to DB
             if firstRecord:
@@ -109,8 +114,8 @@ def parseNcbiBlastOutput(inFilePath, inFileName):
                 seqDB.save(record)
             
             record = { 
-                'refseq_protein_id' : cleanQueryID,
-                'alignment' : [],
+                'protein_id' : cleanQueryID,
+                'alignment' : {},
                 }
             
         
@@ -120,14 +125,13 @@ def parseNcbiBlastOutput(inFilePath, inFileName):
             continue
         else:
             currentRawSubjectID = rawSubjectID
-            cleanSubjectID = rawSubjectID.split(';')[0].split('|')[-2]
-            cleanSubjectID = cleanSubjectID.split('.')[0]
+            cleanSubjectID = rawSubjectID.split('|')[2]
 
             # Get E Value
             eValue = lineFields[-2]
 
             # Add to Record
-            record['alignment'].append( ( cleanSubjectID, eValue ) )
+            record['alignment'].update( { cleanSubjectID : eValue} )
 
     seqDB.save(record)
     # Close File and DB Connection
@@ -196,3 +200,122 @@ def getSequenceHomologyHistogram():
     return
         
     
+# formatBlastDB
+def formatBlastDB():
+    # Get Input File Name
+    inFilePath = PATH_TO_BLAST_DB
+    inFileName = FASTA_FILENAME
+    inFile = inFilePath + inFileName
+
+    # Get Output File Name
+    outFilePath = PATH_TO_BLAST_DB
+    outFileName = BLAST_DB_FILENAME
+    outFile = outFilePath + outFileName
+
+    command = [ PATH_TO_BLAST_BINARY + MAKEBLASTDB_BINARY,
+                '-in', inFile, 
+                '-input_type', 'fasta', 
+                '-dbtype', 'prot',
+                '-out', outFile
+                ]
+    subprocess.call(command)
+
+    return
+
+# runBlast
+def runBlast():
+    # Get DB Filename
+    dbFilePath = PATH_TO_BLAST_DB
+    dbFileName = BLAST_DB_FILENAME
+    dbFile = dbFilePath + dbFileName
+
+    # Get Input File Name
+    inFilePath = PATH_TO_BLAST_DB
+    inFileName = FASTA_FILENAME
+    inFile = inFilePath + inFileName
+
+    # Get Output File Name
+    outFilePath = PATH_TO_BLAST_ANALYSIS
+    outFileName = 'debruijn.exchange.similar.blast.analysis'
+    outFile = outFilePath + outFileName
+
+    command = [ PATH_TO_BLAST_BINARY + BLASTP_BINARY,
+                '-db', dbFile,
+                '-query', inFile, 
+                '-out', outFile,
+                '-outfmt', '6'
+                ]
+    subprocess.call(command)
+    
+    return
+
+# analyzeBlastOutput
+def analyzeBlastOutput():
+    # Open Input File
+    inFilePath = PATH_TO_BLAST_ANALYSIS
+    inFileName = 'debruijn.exchange.similar.blast.analysis'
+    inFile = open(inFilePath + inFileName, 'r')
+
+    currentProteinA = ''
+    currentProteinB = ''
+
+    numHomologous = 0
+    numNonHomologous = 0
+
+    for line in inFile:
+        lineFields = parseTabSeparatedLine(line)
+        proteinA = lineFields[0]
+        proteinB = lineFields[1]
+        eValue = float(lineFields[-2])
+
+        if currentProteinB == proteinB:
+            continue
+
+        currentProteinB = proteinB
+        if eValue < 0.05:
+            numHomologous = numHomologous + 1
+        else:
+            numNonHomologous = numNonHomologous + 1
+
+    print numHomologous
+    print numNonHomologous
+
+def getExchangeSequenceHomology():
+    cli = MongoClient()
+    db = cli.db
+    seqDB = db.proteinAlignment
+    
+    inFilePath = '/home/santhosh/workspace/thesis/data/analysis/module_similarity/exchange/'
+    inFileName = 'debruijn.exchange.protein.pairs'
+    inFile = open(inFilePath + inFileName, 'r')
+
+    numHomologous = 0
+    numNonHomologous = 0
+
+    for line in inFile:
+        lineFields = parseTabSeparatedLine(line)
+        
+        proteinA = lineFields[0]
+        proteinB = lineFields[1]
+    
+        record = seqDB.find_one( { 'protein_id' : proteinA } )
+        if not record:
+            record = seqDB.find_one( { 'protein_id' : proteinB } )
+            if not record:
+                numNonHomologous = numNonHomologous + 1
+                continue
+            alignDict = record.get('alignment')
+            eVal = alignDict.get(proteinA)
+        else:
+            alignDict = record.get('alignment')
+            eVal = alignDict.get(proteinB)
+
+        if eVal <= 0.05:
+            numHomologous = numHomologous + 1
+        else:
+            numNonHomologous = numNonHomologous + 1
+
+    print numHomologous
+    print numNonHomologous
+
+        
