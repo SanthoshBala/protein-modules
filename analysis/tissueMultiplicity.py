@@ -190,9 +190,9 @@ def getModuleHousekeepingIndex():
     # Iterate through <modDB>
     for moduleRecord in modDB.find():
         moduleID = moduleRecord.get('module_id')
-        housekeeping = moduleRecord.get('housekeeping_index')
+        housekeeping = moduleRecord.get('housekeeping')
             
-        outFile.write('%s\t%f\n' % (moduleID, housekeeping))
+        outFile.write('%s\t%s\n' % (moduleID, str(housekeeping)))
 
     # Close File and DB Connection
     outFile.close()
