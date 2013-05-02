@@ -9,7 +9,7 @@
 # Python Imports
 import json
 import math
-from urllib2 import urlopen
+from urllib2 import *
 from multiprocessing import *
 
 # Library Imports
@@ -148,7 +148,11 @@ def getNCBIOfficialSymbol(entrezID):
 
     url = BASE_NCBI_URL % str(entrezID)
     
-    result = urlopen(url).read()
+    request = Request(url)
+    request.add_header('User-Agent', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:20.0) Gecko/20100101 Firefox/20.0')
+    opener = build_opener()
+    response = opener.open(request)
+    result = response.read()
     soup = BeautifulSoup(result)
 
     nameField = soup.find('dd', { 'class' : 'noline' } )
