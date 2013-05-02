@@ -153,7 +153,6 @@ def getModuleGraph(moduleID, symbol = False):
                     entrezID = proteinA
                     symbol = getNCBIOfficialSymbol(entrezID)
                 geneIDProp[vertexA] = symbol
-                print proteinA, entrezID, symbol
             else:
                 geneIDProp[vertexA] = proteinA
             moduleIDVertexMap.update( { proteinA : vertexA } )
@@ -195,11 +194,15 @@ def getModuleGraph(moduleID, symbol = False):
 
 # getModuleGermLayerHash: Gets germ layer hash for <moduleID>. The germ layer
 # hash describes, for a given module, which germ layers it is found in.
-def getModuleGermLayerHash(moduleID):
+def getModuleGermLayerHash(moduleID, shuffle = True):
     # Open DB Connection
     cli = MongoClient()
     db = cli.db
-    modDB = db.modules
+    if shuffle:
+        modDB = db.shuffleModules
+    else:
+        modDB = db.modules
+        
 
     # Get Germ Layers
     moduleRecord = modDB.find_one( { 'module_id' : moduleID } )
