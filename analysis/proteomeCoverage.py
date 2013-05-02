@@ -16,6 +16,11 @@ from settings import *
 from graphs.graphIO import *
 from graphs.graphUtil import *
 
+# Utility Imports
+from common.strings import *
+from common.statistics import *
+
+
 # - - - - - - - - - - LOCAL SETTINGS - - - - - - - - - - #
 
 PATH_TO_PROTEOME_COVERAGE = PATH_TO_ANALYSIS + 'proteome_coverage/'
@@ -43,7 +48,7 @@ def getProteomeCoverage(shuffle = False):
         outFilePath = PATH_TO_PROTEOME_COVERAGE
     outFile = open(outFilePath + outFileName, 'w')
 
-    outFile.write('Tissue\tMicroarray\tPPI\nCoverage')
+    outFile.write('Tissue\tMicroarray\tPPI\tCoverage\n')
 
     # Iterate through Tissues
     for tissue in AUGMENTED_TISSUE_LIST:
@@ -75,6 +80,53 @@ def getProteomeCoverage(shuffle = False):
     cli.close()
 
     return
+
+
+# computeCoverageStatistics: Computes mean coverage and standard deviation.
+def computeCoverageStatistics(shuffle = False):
+    
+    if shuffle:
+        inFileName = 'shuffle.proteome.coverage'
+        outFileName = 'shuffle.proteome.coverage.statistics'
+    else:
+        inFileName = 'proteome.coverage'
+        outFileName = 'proteome.coverage.statistics'
+
+    # Open Input File
+    inFilePath = PATH_TO_PROTEOME_COVERAGE
+    inFile = open(inFilePath + inFileName, 'r')
+
+    # Open Output File
+    outFilePath = PATH_TO_PROTEOME_COVERAGE
+    outFile = open(outFilePath + outFileName, 'w')
+
+
+    coverageList = list()
+    headerLine = True
+
+    # Iterate through <inFile>
+    for line in inFile:
+        if headerLine:
+            headerLine = False
+            continue
+
+        lineFields = parseTabSeparatedLine(line)
+        coverage = lineFields[3]
+        coverageList.append(float(coverage))
+    
+    # Get Mean and Std Dev
+    avg = mean(coverageList)[0]
+    dev = stdDev(coverageList)
+
+    outFile.write('Mean Coverage\t%f\n' % avg)
+    outFile.write('Standard Deviation\t%f\n' % dev)
+
+    # Close Files
+    inFile.close()
+    outFile.close()
+
+    return
+
     
 # compareGlobalAndLocalNetworks: Computes difference between global and union
 # of tissue networks in terms of vertex, edge, and module composition.
