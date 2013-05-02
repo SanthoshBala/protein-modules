@@ -14,14 +14,14 @@ A = importdata(strcat(PATH_TO_TISSUE_MULTIPLICITY, ...
 handle = figure('position', [100 0 1100 1100], 'paperpositionmode', 'auto', ...
             'color', 'none', 'InvertHardCopy', 'off');
         
-hist(A.data, 79, 'BarWidth', 1.0);
+hist(A.data, 79, 'BarWidth', 2.0);
 
 % Change Color
 h = findobj(gca, 'Type', 'patch');
-set(h, 'FaceColor', [0.2, 0.2, 1.0], 'EdgeColor', [1.0, 1.0, 1.0]);
+set(h, 'FaceColor', [0.2, 0.2, 1.0], 'EdgeColor', [0.0, 0.0, 0.0]);
 
 % Title
-title('Human Proteome Tissue Multiplicity', 'fontname', 'Palatino', 'fontsize', 20);
+%title('Human Protein Tissue Multiplicity', 'fontname', 'Palatino', 'fontsize', 20);
 
 % X Axis
 xlabel('Tissue Multiplicity', 'fontname', 'Palatino', 'fontsize', 20);
