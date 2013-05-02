@@ -38,20 +38,20 @@ for i = 1:length(patch)
 end
     
 % X Axis
-xlabel('Protein Tissue Multiplicity', 'fontname', 'Palatino', 'fontsize', 20);
+xlabel('PPI Tissue Multiplicity', 'fontname', 'Palatino', 'fontsize', 24);
 xLabels = {'0-9', '10-19', '20-29', '30-39', '40-49', '50-59', '60-69', '70-79'};
 set(gca, 'xticklabel', xLabels);
 
 % Title
-title('Human PPI Tissue Multiplicity', 'fontname', 'Palatino', 'fontsize', 20);
+title('Human PPI Tissue Multiplicity', 'fontname', 'Palatino', 'fontsize', 24);
 
 % Y Axis
-ylabel('Number of Interactions', 'fontname', 'Palatino', 'fontsize', 20);
+ylabel('Number of Interactions', 'fontname', 'Palatino', 'fontsize', 24);
 set(gca, 'YTickLabel', num2str(transpose(get(gca, 'YTick'))));
 
 % Axes
-set(gca, 'fontname', 'Palatino', 'fontsize', 20);
+set(gca, 'fontname', 'Palatino', 'fontsize', 24);
 box off;
 
 
-print(handle, '-depsc2', '-painters', strcat(PATH_TO_FIGURES, 'protein-tissue-multiplicity.eps'));
+print(handle, '-depsc2', '-painters', strcat(PATH_TO_FIGURES, 'interaction-tissue-multiplicity.eps'));
