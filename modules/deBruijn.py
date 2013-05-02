@@ -15,9 +15,17 @@ from pymongo import *
 # Global Imports
 from settings import *
 
+# Module Imports
+from modules.moduleUtil import *
+
 # Utility Imports
+from common.strings import *
 from common.matrices import *
 
+# - - - - - - - - - - LOCAL SETTINGS - - - - - - - - - - #
+
+PATH_TO_DEBRUIJN_GRAPH = PATH_TO_ANALYSIS + 'debruijn/'
+DEBRUIJN_GRAPH_FILENAME = 'debruijn.similarity.graph'
 
 # - - - - - - - - - - ALGORITHM - - - - - - - - - - #
 
@@ -73,11 +81,14 @@ def getDeBruijnSimilarModules(moduleID):
 # tissue of <tissueSet> and are "exchange similar" to <moduleID>.
 # Two modules are exchange similar if they have the same size
 # and differ by only one element.
-def getExchangeSimilarModules(moduleID, tissueList = AUGMENTED_TISSUE_LIST):
+def getExchangeSimilarModules(moduleID, tissueList = AUGMENTED_TISSUE_LIST, shuffle = False):
     # Open DB Connection
     cli = MongoClient()
     db = cli.db
-    modDB = db.modules
+    if shuffle:
+        modDB = db.shuffleModules
+    else:
+        modDB = db.modules
 
     similarMods = set()
     tissueSet = set(tissueList)
@@ -91,7 +102,7 @@ def getExchangeSimilarModules(moduleID, tissueList = AUGMENTED_TISSUE_LIST):
     for i in range(numGenes):
         truncGeneList = moduleGeneList[0:i] + moduleGeneList[i+1:numGenes]
 
-        # Substitution Similar Modules Have Same # of Genes as <moduleID>
+        #  Similar Modules Have Same # of Genes as <moduleID>
         substitutionMods = modDB.find( {'gene_list':{'$all':truncGeneList}} )
 
         # Iterate through Possible Similar Modules
@@ -117,11 +128,14 @@ def getExchangeSimilarModules(moduleID, tissueList = AUGMENTED_TISSUE_LIST):
 # getAdditionSimilarModules: Get all modules that are found in any
 # tissue of <tissueSet> and are "addition similar" to <moduleID>.
 # A is addition similar to B if |A| = |B| + 1, and B is a subset of A.
-def getAdditionSimilarModules(moduleID, tissueList = AUGMENTED_TISSUE_LIST):
+def getAdditionSimilarModules(moduleID, tissueList = AUGMENTED_TISSUE_LIST, shuffle = False):
     # Open DB Connection
     cli = MongoClient()
     db = cli.db
-    modDB = db.modules
+    if shuffle:
+        modDB = db.shuffleModules
+    else:
+        modDB = db.modules
 
     additionMods = set()
     tissueSet = set(tissueList)
@@ -157,11 +171,14 @@ def getAdditionSimilarModules(moduleID, tissueList = AUGMENTED_TISSUE_LIST):
 # getRemovalSimilarModules: Get all modules that are found in any
 # tissue of <tissueSet> and are "removal similar" to <moduleID>.
 # A is removal similar to B if |A| = |B| - 1, and A is a subset of B.
-def getRemovalSimilarModules(moduleID, tissueList = AUGMENTED_TISSUE_LIST):
+def getRemovalSimilarModules(moduleID, tissueList = AUGMENTED_TISSUE_LIST, shuffle = False):
     # Open DB Connection
     cli = MongoClient()
     db = cli.db
-    modDB = db.modules
+    if shuffle:
+        modDB = db.shuffleModules
+    else:
+        modDB = db.modules
 
     removalMods = set()
     tissueSet = set(tissueList)
@@ -205,17 +222,24 @@ def getRemovalSimilarModules(moduleID, tissueList = AUGMENTED_TISSUE_LIST):
 # createDeBruijnSetGraph: Creates graph in which nodes are modules, and edges
 # represent similarities between modules. Each edge is annotated with the
 # similarity type. The graph is written to <outFileName>.
-def createDeBruijnSetGraph(outFileName, tissueList = AUGMENTED_TISSUE_LIST):
+def createDeBruijnSetGraph(tissueList = AUGMENTED_TISSUE_LIST, shuffleVal = False):
     # Open DB Connection
     cli = MongoClient()
     db = cli.db
-    modDB = db.modules
+    if shuffleVal:
+        modDB = db.shuffleModules
+    else:
+        modDB = db.modules
 
     tissueSet = set(tissueList)
 
     # Open Output File
-    outFilePath = PATH_TO_MODULE_SIMILARITY + outFileName
-    outFile = open(outFilePath, 'w')
+    if shuffleVal:
+        outFileName = 'shuffle.' + DEBRUIJN_GRAPH_FILENAME
+    else:
+        outFileName = DEBRUIJN_GRAPH_FILENAME
+    outFilePath = PATH_TO_DEBRUIJN_GRAPH
+    outFile = open(outFilePath + outFileName, 'w')
 
     # Iterate through Modules
     for moduleRecord in modDB.find():
@@ -234,13 +258,13 @@ def createDeBruijnSetGraph(outFileName, tissueList = AUGMENTED_TISSUE_LIST):
             continue
 
         # Get Similar Modules for <moduleID>
-        exchangeSimMods = getExchangeSimilarModules(moduleID, tissueList)
-        additionSimMods = getAdditionSimilarModules(moduleID, tissueList)
+        exchangeSimMods = getExchangeSimilarModules(moduleID, tissueList, shuffle = shuffleVal)
+        additionSimMods = getAdditionSimilarModules(moduleID, tissueList, shuffle = shuffleVal)
         removalSimMods = set()
 
         # Ignore Deletion Similar Modules for 4-Protein Modules
         if len(moduleRecord.get('gene_list')) != MODULE_SIZE_THRESHOLD:
-            removalSimMods = getRemovalSimilarModules(moduleID, tissueSet)
+            removalSimMods = getRemovalSimilarModules(moduleID, tissueSet, shuffle = shuffleVal)
 
         # Write Edges to File
         for exchange in exchangeSimMods:
@@ -251,9 +275,9 @@ def createDeBruijnSetGraph(outFileName, tissueList = AUGMENTED_TISSUE_LIST):
             outFile.write('%s\t%s\tremoval\n' % (moduleID, removal))
 
         # Write Singleton Nodes with Self Edges
-        if len(substitutionSimMods) == 0:
-            if len(insertionSimMods) == 0:
-                if len(deletionSimMods) == 0:
+        if len(exchangeSimMods) == 0:
+            if len(additionSimMods) == 0:
+                if len(removalSimMods) == 0:
                     outFile.write('%s\t%s\tself\n' % (moduleID, moduleID))
 
     # Close File and DB Connection
@@ -266,19 +290,24 @@ def createDeBruijnSetGraph(outFileName, tissueList = AUGMENTED_TISSUE_LIST):
 # - - - - - - - - - - DE BRUIJN SET GRAPH ANALYSIS - - - - - - - - - - #
 
 
-# createEmbryonicDeBruijnAdditionMatrix: Creates matrix representing
+# getEmbryonicDeBruijnAdditionMatrix: Creates matrix representing
 # the number of addition similarities between vertices of two types. The
 # "type" is the germ layer hash of the modules representing the two nodes.
 # i.e. (MESO)-->(MESO+ENDO) increments M[2][6] by 1.
-def createEmbryonicDeBruijnAdditionMatrix(inFileName):
+def getEmbryonicDeBruijnAdditionMatrix():
     # Open DB Connection
     cli = MongoClient()
     db = cli.db
     modDB = db.modules
     
     # Open Input File
-    inFilePath = PATH_TO_MODULE_SIMILARITY + inFileName
-    inFile = open(inFilePath, 'r')
+    inFileName = DEBRUIJN_GRAPH_FILENAME
+    inFilePath = PATH_TO_DEBRUIJN_GRAPH
+    inFile = open(inFilePath + inFileName, 'r')
+
+    outFileName = 'debruijn.germ.addition.matrix'
+    outFilePath = PATH_TO_DEBRUIJN_GRAPH
+    outFile = open(outFilePath + outFileName, 'w')
 
     additionMatrix = constructSquareIntegerMatrix(8)
 
@@ -290,30 +319,40 @@ def createEmbryonicDeBruijnAdditionMatrix(inFileName):
             continue
 
         # Get Germ Layer Hashes
-        hashA = getGermLayerHash(lineFields[0])
-        hashB = getGermLayerHash(lineFields[1])
+        hashA = getModuleGermLayerHash(lineFields[0])
+        hashB = getModuleGermLayerHash(lineFields[1])
 
         additionMatrix[hashA][hashB] = additionMatrix[hashA][hashB] + 1
 
+    # Write Matrix to File
+    writeMatrixToFile(additionMatrix, outFile)
+
     # Close File and DB Connection
     inFile.close()
+    outFile.close()
     cli.close()
 
     return
 
-# createEmbryonicDeBruijnRemovalMatrix: Creates matrix representing
+# getEmbryonicDeBruijnRemovalMatrix: Creates matrix representing
 # the number of removal similarities between vertices of two types. The
 # "type" is the germ layer hash of the modules representing the two nodes.
 # i.e. (MESO)-->(MESO+ENDO) increments M[2][6] by 1.
-def constructEmbryonicDeBruijnRemovalMatrix(inFileName):
+def getEmbryonicDeBruijnRemovalMatrix():
     # Open DB Connection
     cli = MongoClient()
     db = cli.db
     modDB = db.modules
     
     # Open Input File
-    inFilePath = PATH_TO_MODULE_SIMILARITY + inFileName
-    inFile = open(inFilePath, 'r')
+    inFileName = DEBRUIJN_GRAPH_FILENAME
+    inFilePath = PATH_TO_DEBRUIJN_GRAPH
+    inFile = open(inFilePath + inFileName, 'r')
+
+    # Open Output File
+    outFileName = 'debruijn.germ.removal.matrix'
+    outFilePath = PATH_TO_DEBRUIJN_GRAPH
+    outFile = open(outFilePath + outFileName, 'w')
 
     removalMatrix = constructSquareIntegerMatrix(8)
 
@@ -325,14 +364,17 @@ def constructEmbryonicDeBruijnRemovalMatrix(inFileName):
             continue
 
         # Get Germ Layer Hashes
-        hashA = getGermLayerHash(lineFields[0])
-        hashB = getGermLayerHash(lineFields[1])
+        hashA = getModuleGermLayerHash(lineFields[0])
+        hashB = getModuleGermLayerHash(lineFields[1])
 
         removalMatrix[hashA][hashB] = removalMatrix[hashA][hashB] + 1
 
+    # Write Matrix to File
+    writeMatrixToFile(removalMatrix, outFile)
 
     # Close File and DB Connection
     inFile.close()
+    outFile.close()
     cli.close()
 
     return
@@ -341,15 +383,27 @@ def constructEmbryonicDeBruijnRemovalMatrix(inFileName):
 # the number of exchange similarities between vertices of two types. The
 # "type" is the germ layer hash of the modules representing the two nodes.
 # i.e. (MESO)-->(MESO+ENDO) increments M[2][6] by 1.
-def constructEmbryonicDeBruijnExchangeMatrix(inFileName):
+def getEmbryonicDeBruijnExchangeMatrix(shuffle = True):
     # Open DB Connection
     cli = MongoClient()
     db = cli.db
     modDB = db.modules
     
     # Open Input File
-    inFilePath = PATH_TO_MODULE_SIMILARITY + inFileName
-    inFile = open(inFilePath, 'r')
+    if shuffle:
+        inFileName = 'shuffle.' + DEBRUIJN_GRAPH_FILENAME
+    else:
+        inFileName = DEBRUIJN_GRAPH_FILENAME
+    inFilePath = PATH_TO_DEBRUIJN_GRAPH
+    inFile = open(inFilePath + inFileName, 'r')
+
+    # Open Output File
+    if shuffle:
+        outFileName = 'shuffle.debruijn.germ.exchange.matrix'
+    else: 
+        outFileName = 'debruijn.germ.exchange.matrix'
+    outFilePath = PATH_TO_DEBRUIJN_GRAPH
+    outFile = open(outFilePath + outFileName, 'w')
 
     exchangeMatrix = constructSquareIntegerMatrix(8)
 
@@ -361,35 +415,124 @@ def constructEmbryonicDeBruijnExchangeMatrix(inFileName):
             continue
 
         # Get Germ Layer Hashes
-        hashA = getGermLayerHash(lineFields[0])
-        hashB = getGermLayerHash(lineFields[1])
+        if shuffle:
+            hashA = getModuleGermLayerHash(lineFields[0], shuffle = True)
+            hashB = getModuleGermLayerHash(lineFields[1])
+        else:
+            hashA = getModuleGermLayerHash(lineFields[0], shuffle = True)
+            hashB = getModuleGermLayerHash(lineFields[1])
 
         exchangeMatrix[hashA][hashB] = exchangeMatrix[hashA][hashB] + 1
 
+    # Write Matrix to File
+    writeMatrixToFile(exchangeMatrix, outFile)
+
     # Close File and DB Connection
     inFile.close()
+    outFile.close()
     cli.close()
 
     return
 
 # getDeBruijnEdgeTypeCounts: Returns # of Exchanges, Additions, and Removals.
-def getDeBruijnEdgeTypeCounts(inFileName):
+def getDeBruijnEdgeTypeCounts(shuffle = False):
     # Open Input File
-    inFilePath = PATH_TO_MODULE_SIMILARITY + inFileName
-    inFile = open(inFilePath, 'r')
+    if shuffle:
+        inFileName = 'shuffle.' + DEBRUIJN_GRAPH_FILENAME
+    else:
+        inFileName = DEBRUIJN_GRAPH_FILENAME
+    inFilePath = PATH_TO_DEBRUIJN_GRAPH
+    inFile = open(inFilePath + inFileName, 'r')
 
-    numExchanges = 0
+    # Open Output File
+    if shuffle:
+        outFileName = 'shuffle.debruijn.edge.type.counts'
+    else:
+        outFileName = 'debruijn.edge.type.counts'
+    outFilePath = PATH_TO_DEBRUIJN_GRAPH
+    outFile = open(outFilePath + outFileName, 'w')
+
     numAdditions = 0
     numRemovals = 0
+    numExchanges = 0
 
     # Iterate through Graph
     for line in inFile:
         lineFields = parseTabSeparatedLine(line)
         if lineFields[2] == 'addition':
-            numInsertions = numAdditions + 1
+            numAdditions = numAdditions + 1
         if lineFields[2] == 'removal':
-            numDeletions = numRemovals + 1
+            numRemovals = numRemovals + 1
         if lineFields[2] == 'exchange':
-            numSubstitutions = numExchanges + 1
+            numExchanges = numExchanges + 1
 
-    return numExchanges, numAdditions, numRemovals
+    # Write Output
+    outFile.write('additions: %d\n' % numAdditions)
+    outFile.write('removals: %d\n' % numRemovals)
+    outFile.write('exchanges: %d\n' % numExchanges)
+
+    # Close Files
+    inFile.close()
+    outFile.close()
+
+    return
+
+def getSameOrganSystemEdgeCounts():
+    # Open DB Connection
+    cli = MongoClient()
+    db = cli.db
+    modDB = db.modules
+
+    # Open Input File
+    inFileName = DEBRUIJN_GRAPH_FILENAME
+    inFilePath = PATH_TO_DEBRUIJN_GRAPH
+    inFile = open(inFilePath + inFileName, 'r')
+
+    numSame = 0
+    numDiff = 0
+
+    skipLine = True
+
+    # Iterate through Graph
+    for line in inFile:
+        if skipLine:
+            skipLine = False
+            continue
+
+        lineFields = parseTabSeparatedLine(line)
+
+        moduleA = lineFields[0]
+        moduleB = lineFields[1]
+
+        if moduleA == moduleB:
+            continue
+
+        recordA = modDB.find_one( { 'module_id' : moduleA } )
+        recordB = modDB.find_one( { 'module_id' : moduleB } )
+
+        tissuesA = recordA.get('tissue_list')
+        if len(tissuesA) > 1:
+            continue
+        tissuesB = recordB.get('tissue_list')
+        if len(tissuesB) > 1:
+            continue
+
+        if tissuesA[0] == 'global' or tissuesB[0] == 'global':
+            continue
+
+        if tissuesA[0] == 'intersection' or tissuesB[0] == 'intersection':
+            numSame = numSame + 1
+            continue
+
+        organA = TISSUE_SYSTEM_MAP.get(tissuesA[0])
+        organB = TISSUE_SYSTEM_MAP.get(tissuesB[0])
+
+        if organA == organB:
+            numSame = numSame + 1
+        else:
+            numDiff = numDiff + 1
+
+    print numSame
+    print numDiff
+
+#createDeBruijnSetGraph(shuffleVal = True)
