@@ -96,11 +96,4 @@ function [D, V, RANDOM_TISSUE_LIST] = pcaAnalysis( inFileName )
     [ D, V ] = pca( M );
     
     % Get Principal Eigenvalues/Vectors
-    primaryVector = V(:,79);
-    
-    for i = 1:length(primaryVector)
-        if primaryVector(i) > 0.1
-            disp(RANDOM_TISSUE_LIST(i));
-        end
-    end
 end
