@@ -16,9 +16,11 @@ from settings import *
 # Nomenclature Imports
 from nomenclature.geneID import *
 
+# Ontology Imports
+from ontology.geneOntology import *
 
 # createModuleOntologyDB
-def createModuleOntologyDB(hypergeometric = True):
+def createModuleOntologyDB(skipVal = 0, limitVal = 1000):
     # Open DB Connection
     cli = MongoClient()
     db = cli.db
@@ -27,7 +29,7 @@ def createModuleOntologyDB(hypergeometric = True):
     geneOntDB = db.geneOntology
 
     # Iterate through Module DB
-    for record in modDB.find():
+    for record in modDB.find(skip=skipVal, limit=limitVal):
         moduleID = record.get('module_id')
         geneList = record.get('gene_list')
         if PRINT_PROGRESS:
@@ -51,49 +53,87 @@ def createModuleOntologyDB(hypergeometric = True):
                 entrezID = geneID
             entrezGeneList.append(entrezID)
         
+        numModGenes = len(entrezGeneList)
+        numGenes = geneOntDB.find().count()
+
         # Iterate through Genes in <moduleID>
         for geneID in entrezGeneList:
             # Get Gene Annotations
             geneFuncs, geneProcs, geneComps = getGeneAnnotation(geneID,
                                                                 combined = False)
             
+            # Iterate through Function Annotations
             for funcAnnot in geneFuncs:
                 # Fill in Matrix for Fisher's Exact Test                
-                constructQueryForGO('function', funcAnnot, entrezGeneList)
+                query = constructQueryForGO(funcAnnot, 'function',
+                                            entrezGeneList)
+                # Number of Genes in Module with Annotation
+                numModPos = geneOntDB.find(query).count()
+                # Number of Genes in Module without Annotation
+                numModNeg = numModGenes - numModPos
 
-        # Iterate through Genes in <moduleID>
-        for geneID in geneList:
-            # Get Gene Annotations
-            geneOntologyRecord = goDB.find_one( { 'entrez_gene_id' : geneID } )
-            if not geneOntologyRecord:
-                continue
+                query = constructQueryForGO(funcAnnot, 'function')
+                # Number of Genes not in Module with Annotation
+                numGenPos = geneOntDB.find(query).count() - numModPos
+                # Number of Genes not in Module without Annotation
+                numGenNeg = numGenes - numGenPos - numModPos
 
-            geneFunctions = set()
-            geneProcesses = set()
-            geneComponents = set()
+                p = pvalue(numModPos, numModNeg, numGenPos, numGenNeg)
 
-            geneFunctionList = annotRecord.get('function')
-            geneProcessList = annotRecord.get('process')
-            geneComponentList = annotRecord.get('component')
-
-            for function in geneFunctionList:
-                geneFunctionSet.add(tuple(function))
-            for process in geneProcessList:
-                geneProcessSet.add(tuple(process))
-            for component in geneComponentList:
-                geneComponentSet.add(tuple(component))
-
-            moduleFunctions = moduleFunctions.union(geneFunctionSet)
-            moduleProcesses = moduleProcesses.union(geneProcessSet)
-            moduleComponents = moduleComponents.union(geneComponentSet)
-            
-        newModuleRecord.update( { 'component' : list(moduleComponents) } )
-        newModuleRecord.update( { 'function' : list(moduleFunctions) } )
-        newModuleRecord.update( { 'process' : list(moduleProcesses ) } )
-
-        maDB.save(newModuleRecord)
+                if p.two_tail < 0.05:
+                    modFunctions.add(tuple(funcAnnot))
     
+            # Iterate through Process Annotations
+            for procAnnot in geneProcs:
+                # Fill in Matrix for Fisher's Exact Test                
+                query = constructQueryForGO(procAnnot, 'process',
+                                            entrezGeneList)
+                # Number of Genes in Module with Annotation
+                numModPos = geneOntDB.find(query).count()
+                # Number of Genes in Module without Annotation
+                numModNeg = numModGenes - numModPos
+
+                query = constructQueryForGO(procAnnot, 'process')
+                # Number of Genes not in Module with Annotation
+                numGenPos = geneOntDB.find(query).count() - numModPos
+                # Number of Genes not in Module without Annotation
+                numGenNeg = numGenes - numGenPos - numModPos
+
+                p = pvalue(numModPos, numModNeg, numGenPos, numGenNeg)
+
+                if p.two_tail < 0.05:
+                    modProcesses.add(tuple(procAnnot))
+
+            # Iterate through Component Annotations
+            for compAnnot in geneComps:
+                # Fill in Matrix for Fisher's Exact Test                
+                query = constructQueryForGO(compAnnot, 'component', 
+                                            entrezGeneList)
+                # Number of Genes in Module with Annotation
+                numModPos = geneOntDB.find(query).count()
+                # Number of Genes in Module without Annotation
+                numModNeg = numModGenes - numModPos
+
+                query = constructQueryForGO(compAnnot, 'component')
+                # Number of Genes not in Module with Annotation
+                numGenPos = geneOntDB.find(query).count() - numModPos
+                # Number of Genes not in Module without Annotation
+                numGenNeg = numGenes - numGenPos - numModPos
+
+                p = pvalue(numModPos, numModNeg, numGenPos, numGenNeg)
+
+                if p.two_tail < 0.05:
+                    modComponents.add(tuple(compAnnot)) 
+                    
+        modOntologyRecord.update( { 'component' : list(modComponents) } )
+        modOntologyRecord.update( { 'function' : list(modFunctions) } ) 
+        modOntologyRecord.update( { 'process' : list(modProcesses) } )
+        modOntDB.save(modOntologyRecord)
+    
+    # Close DB Connection    
     cli.close()
+    
+    return
 
 # Get Annotation Averages
 def getAnnotationAverages():
